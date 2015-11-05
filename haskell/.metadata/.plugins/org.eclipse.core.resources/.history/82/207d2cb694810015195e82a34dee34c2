@@ -1,0 +1,8 @@
+module WordCount (wordCount) where
+
+wordCount :: String -> Map[String,Int]
+wordCount = undefined
+--  relevantChars
+--  where relevantChars = 
+
+

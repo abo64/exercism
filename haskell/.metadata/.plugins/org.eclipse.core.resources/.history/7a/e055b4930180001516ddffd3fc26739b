@@ -1,0 +1,44 @@
+module ListOps (length, reverse, map, filter, foldr, foldl', (++), concat) where
+
+import Prelude hiding
+  ( length, reverse, map, filter, foldr, (++), concat )
+
+foldl' :: (b -> a -> b) -> b -> [a] -> b
+foldl' _ b [] = b
+foldl' f b (h:t) =
+  let next = f b h
+  in next `seq` foldl' f next t
+
+foldr :: (a -> b -> b) -> b -> [a] -> b
+foldr _ b [] = b
+foldr f b (h:t) = foldr f (f h b) t
+
+length :: [a] -> Int
+length = loop 0
+  where
+    loop acc  [] = acc
+    loop acc (_:t) = loop (acc + 1) t
+
+reverse :: [a] -> [a]
+reverse = loop []
+  where
+    loop acc [] = acc
+    loop acc (h:t) = loop (h:acc) t
+
+map :: (a -> b) -> [a] -> [b]
+map _ [] = []
+map f (h:t) = f h : map f t
+
+filter :: (a -> Bool) -> [a] -> [a]
+filter _ [] = []
+filter f (h:t) 
+  | f h = h : filter f t
+  | otherwise = filter f t
+
+(++) :: [a] -> [a] -> [a]
+[] ++ ys = ys
+(h:t) ++ ys = h : t ++ ys
+
+concat :: [[a]] -> [a]
+concat [] = []
+concat (h:t) = h ++ concat t

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="net.sf.eclipsefp.haskell.debug.core.internal.launch.HaskellLaunchDelegate">
+<stringAttribute key="DELEGATE" value="net.sf.eclipsefp.haskell.debug.ui.internal.launch.ghci.GhciLaunchOperationDelegate"/>
+<stringAttribute key="EXECUTABLE" value="/usr/bin/ghc"/>
+<stringAttribute key="EXTRA_ARGUMENTS" value=""/>
+<listAttribute key="FILES">
+<listEntry value="list-ops_test.hs"/>
+</listAttribute>
+<stringAttribute key="FIRST_SELECTED_RESOURCE" value="list-ops_test.hs"/>
+<stringAttribute key="PROJECT_NAME" value="list-ops"/>
+<booleanAttribute key="RELOAD" value="true"/>
+<booleanAttribute key="SYNC_STREAMS" value="true"/>
+<stringAttribute key="WORKING_DIRECTORY" value="/home/abotz/exercism/haskell/list-ops"/>
+</launchConfiguration>

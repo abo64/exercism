@@ -1,0 +1,10 @@
+module Robot (robotName, mkRobot, resetName) where
+
+newtype Robot = Robot (String)
+
+robotName = undefined
+
+mkRobot :: IO Robot
+mkRobot = undefined
+
+resetName = undefined

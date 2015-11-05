@@ -1,0 +1,20 @@
+module ETL (transform) where
+
+import Data.Map (Map, toList, fromList)
+
+type Letter = String
+type Point = Int
+type Letters = [Letter]
+type OldScore = (Point,Letters)
+type NewScore = (Letter,Point)
+type OldScoreFormat = Map Point Letters
+type NewScoreFormat = Map Letter Point
+
+transform :: OldScoreFormat -> NewScoreFormat
+transform oldScoreFormat =
+  oldScoreAsList >>= oldScoreToNewScores
+  where
+    oldScoreAsList :: [OldScore]
+    oldScoreAsList = toList oldScoreFormat
+    oldScoreToNewScores :: OldScore -> NewScore
+    oldScoreToNewScores = undefined

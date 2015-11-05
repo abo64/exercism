@@ -1,0 +1,5 @@
+module Meetup (Weekday(..), Schedule(..), meetupDay) where
+
+data Weekday = Sunday | Monday | Tuesday | Wednesday | Thursday | Friday | Saturday
+
+data Schedule = Teenth | First | Second | Third | Fourth

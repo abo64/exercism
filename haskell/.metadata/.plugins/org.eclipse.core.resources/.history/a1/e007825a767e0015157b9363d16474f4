@@ -1,0 +1,28 @@
+module School (School, add, empty, sorted, grade) where
+
+import Data.Map.Strict (Map)
+import qualified Data.Map as Map
+import Data.List (sort)
+
+type Grade = Int
+type Name = String
+type School = Map Grade [Name]
+
+add :: Grade -> Name -> School -> School
+add grad name school =
+  Map.insertWith (++) grad [name] school
+
+empty :: School
+empty = Map.empty
+
+sorted :: School -> [(Grade, [Name])]
+sorted school =
+  Map.toList withSortedValues
+  where
+    withSortedValues = Map.map sort school
+
+grade :: Grade -> School -> [Name]
+grade grad school =
+  case Map.lookup grad school of
+    Just names -> names
+    _ -> []

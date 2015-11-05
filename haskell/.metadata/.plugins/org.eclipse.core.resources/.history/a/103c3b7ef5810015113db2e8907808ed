@@ -1,0 +1,20 @@
+module WordCount (wordCount) where
+
+import Data.Char (isDigit, isLetter, isSpace, isPunctuation, toLower)
+import Data.Map (Map, empty, insertWith')
+
+wordCount :: String -> Map String Int
+wordCount text =
+  foldl step empty theWords
+  where
+    theWords = words normalizedText
+    step m w = insertWith' (+) w 1 m
+    normalizedText = map specialToSpaceChar text
+    specialToSpaceChar :: Char -> Char
+    specialToSpaceChar char =
+      if isWordChar char then char
+      else ' '
+    isWordChar char = isDigit char || isLetter char
+--    normalizedText = map toLower withoutPunct
+--    withoutPunct = filter noPunct text
+--    noPunct char = isDigit char || isLetter char || isSpace char

@@ -1,0 +1,28 @@
+module Robot (robotName, mkRobot, resetName) where
+
+import System.Random (newStdGen, randomRs)
+
+newtype Robot = Robot { getName :: String }
+
+robotName :: Robot -> IO String
+robotName robot =
+  return (getName robot)
+
+mkRobot :: IO Robot
+mkRobot = do
+  name <- newName
+  let robot = Robot name
+  return robot
+
+resetName :: Robot -> IO ()
+resetName = undefined
+
+newName :: IO String
+newName = do
+  gen <- newStdGen
+  let lettersGen = randomRs ('A', 'Z') gen
+      digitsGen = randomRs ('0', '9') gen
+      letters = take 2 lettersGen
+      digits = take 3 digitsGen
+      name = letters ++ digits
+  return name

@@ -1,0 +1,28 @@
+module LinkedList (new, next, isNil, datum, toList, fromList, nil, reverseLinkedList) where
+
+--infixr 5 :-:
+data LinkedList a = Empty | Cons a (LinkedList a) deriving (Show, Eq, Read, Ord)
+
+new :: a -> LinkedList a -> LinkedList a
+new a as = Cons a as
+
+next :: LinkedList a -> LinkedList a
+next (Cons _ as) = as
+next Empty = error "next called on Empty"
+
+nil :: LinkedList a
+nil = Empty
+
+isNil :: LinkedList a -> Bool
+isNil Empty = True
+isNil _ = False
+
+datum :: LinkedList a -> a
+datum (Cons a _) = a
+datum Empty = error "datum called on Empty"
+
+toList = undefined
+
+fromList = undefined
+
+reverseLinkedList = undefined
