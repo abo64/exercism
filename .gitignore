@@ -16,4 +16,6 @@ bin/
 .metadata/
 .recommenders/
 xscala/
+.dist-buildwrapper/
+.gitignore~
 

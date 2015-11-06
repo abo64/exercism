@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<section name="Workbench">
-	<item value="180" key="net.sf.eclipsefp.haskell.ui.internal.preferences.scion.ScionPP.columnWidth0"/>
-	<item value="144" key="net.sf.eclipsefp.haskell.ui.internal.preferences.scion.ScionPP.columnWidth1"/>
-	<item value="144" key="net.sf.eclipsefp.haskell.ui.internal.preferences.scion.ScionPP.columnWidth2"/>
-	<item value="1" key="net.sf.eclipsefp.haskell.ui.internal.preferences.scion.ScionPP.sortColumn"/>
-	<item value="323" key="net.sf.eclipsefp.haskell.ui.internal.preferences.scion.ScionPP.columnWidth3"/>
-</section>
