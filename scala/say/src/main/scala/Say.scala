@@ -14,53 +14,51 @@ object Say {
   private def isWithinBounds(number: Number) =
     number >= LowerBound && number <= UpperBound
 
+  private val OneToNineTranslations = OneToNine map (_._2)
+
   def translate(number: Number): Translation = {
-    val start = ReducibleTranslation(number, "")
-    val fullTranslation = NumberLexicon.foldLeft(start)(_ reduce _)
-    val ReducibleTranslation(0, translation) = fullTranslation
-    translation
-  }
-}
+    def concatTranslation(soFar: Translation, next: Translation): Translation = {
+      val separator =
+        if (soFar.isEmpty) ""
+        else if (soFar.endsWith("ty") && OneToNineTranslations.contains(next)) "-"
+        else " "
 
-case class ReducibleTranslation(number: Number, translation: Translation)
-{
-  def reduce(other: ReducibleTranslation): ReducibleTranslation = {
-    if (number < other.number) this
-    else if (number >= 100) this / other
-    else if (other != Zero || translation == "") this - other
-    else this
-  }
+      s"$soFar$separator$next"
+    }
 
-  def -(other: ReducibleTranslation): ReducibleTranslation = {
-    val nextNumber = number - other.number
-    val separator =
-      if (translation.isEmpty) ""
-      else if (translation.endsWith("ty")) "-"
-      else " "
-    val nextTranslation = s"$translation${separator}${other.translation}"
-    ReducibleTranslation(nextNumber, nextTranslation)
+    if (number == 0) Zero._2
+    else {
+      val translations = unfoldRight(number)(next)
+      translations.foldLeft("")(concatTranslation)
+    }
   }
 
-  def /(other: ReducibleTranslation): ReducibleTranslation = {
-    val division = number / other.number
-    val oneTo999 = translate(division)
-    this - ReducibleTranslation(division * other.number, s"$oneTo999 ${other.translation}")
-  }
+  private def next(number: Number): Option[(Translation,Number)] =
+    NumberLexicon filter (_._1 <= number) match {
+      case (n, t) :: _ if n >= 100 =>
+        val factor = number / n
+        Some(s"${translate(factor)} $t", number - factor * n)
+      case (n, t) :: _ => Some(t, number - n)
+      case _ => None
+    }
+
+  private def unfoldRight[A, B](seed: B)(f: B => Option[(A, B)]): List[A] =
+    f(seed) match {
+      case None => Nil
+      case Some((a, b)) => a :: unfoldRight(b)(f)
+    }
 }
 
 object Lexicon {
-  private type LexiconEntry = ReducibleTranslation
+  private type LexiconEntry = (Number, Translation)
   private type Lexicon = Seq[LexiconEntry]
-  private val LexiconEntry = ReducibleTranslation
-
-  implicit def pairToLexiconEntry(pair: (Number,Translation)): LexiconEntry =
-    LexiconEntry(pair._1, pair._2)
+  private val LexiconEntry = (_:Number, _:Translation)
 
   implicit val leOrdering: Ordering[LexiconEntry] =
-    Ordering.by[LexiconEntry,Number](_.number).reverse
+    Ordering.by[LexiconEntry,Number](_._1).reverse
 
   private implicit def pairsToLexicon(pairs: Iterable[(Number,Translation)]): Lexicon =
-    pairs.toSeq map pairToLexiconEntry sorted
+    pairs.toSeq sorted
 
   val Zero = LexiconEntry(0, "zero")
 
@@ -91,5 +89,5 @@ object Lexicon {
   private val Billions = LexiconEntry(1000000000, "billion")
 
   val NumberLexicon: Lexicon =
-    Seq(Billions, Millions, Thousands, Hundreds) ++ OneTo99 :+ Zero
+    Seq(Billions, Millions, Thousands, Hundreds) ++ OneTo99 //:+ Zero
 }
