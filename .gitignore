@@ -17,5 +17,6 @@ bin/
 .recommenders/
 xscala/
 .dist-buildwrapper/
+dist/
 .gitignore~
 
