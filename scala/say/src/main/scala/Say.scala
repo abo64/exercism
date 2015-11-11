@@ -28,49 +28,60 @@ object Say {
 
     if (number == 0) Zero._2
     else {
-      val translations = unfoldRight(number)(next)
-      translations.foldLeft("")(concatTranslation)
+      triplets(number)
+        .zip(TripletTranslations)
+        .reverse
+        .collect {
+          case (tripletValue, tripletTranslation) if tripletValue % 1000 > 0 =>
+            translateLT1000(tripletValue % 1000) + tripletTranslation
+        }
+        .mkString(" ")
     }
   }
 
-  private def next(number: Number): Option[(Translation,Number)] =
-    NumberLexicon filter (_._1 <= number) match {
-      case (n, t) :: _ if n >= 100 =>
-        val factor = number / n
-        Some(s"${translate(factor)} $t", number - factor * n)
-      case (n, t) :: _ => Some(t, number - n)
-      case _ => None
-    }
+  private def triplets(n: Number) = Stream.iterate(n)(_ / 1000)
 
-  private def unfoldRight[A, B](seed: B)(f: B => Option[(A, B)]): List[A] =
-    f(seed) match {
-      case None => Nil
-      case Some((a, b)) => a :: unfoldRight(b)(f)
-    }
+  private val TripletTranslations =
+    Seq("", " thousand", " million", " billion", " trillion")
+
+  private def translateLT1000(number: Number, soFar: Translation = ""): Translation =
+    OneTo999
+      .filter (_._1 <= number)
+      .headOption map {
+        case (100, hundred) =>
+          val factor = number / 100
+          translateLT1000(number - factor * 100, translateLT1000(factor) + hundred)
+        case (n, t) =>
+          val sep =
+            if (soFar.isEmpty) ""
+            else if (soFar.endsWith("ty") && OneToNineTranslations.contains(t)) "-"
+            else " "
+          translateLT1000(number - n, s"$soFar$sep$t")
+      } getOrElse soFar
 }
 
 object Lexicon {
   private type LexiconEntry = (Number, Translation)
   private type Lexicon = Seq[LexiconEntry]
-  private val LexiconEntry = (_:Number, _:Translation)
+  private val LexiconEntry = (_: Number, _: Translation)
 
   implicit val leOrdering: Ordering[LexiconEntry] =
-    Ordering.by[LexiconEntry,Number](_._1).reverse
+    Ordering.by[LexiconEntry, Number](_._1).reverse
 
-  private implicit def pairsToLexicon(pairs: Iterable[(Number,Translation)]): Lexicon =
+  private implicit def pairsToLexicon(pairs: Iterable[(Number, Translation)]): Lexicon =
     pairs.toSeq sorted
 
   val Zero = LexiconEntry(0, "zero")
 
   val OneToNine: Lexicon =
     Set(1L -> "one", 2L -> "two", 3L -> "three", 4L -> "four",
-        5L -> "five", 6L -> "six", 7L -> "seven", 8L -> "eight",
-        9L -> "nine")
+      5L -> "five", 6L -> "six", 7L -> "seven", 8L -> "eight",
+      9L -> "nine")
 
   val TenToNineteen: Lexicon =
     Set(10L -> "ten", 11L -> "eleven", 12L -> "twelve", 13L -> "thirteen",
-        14L -> "fourteen", 15L -> "fifteen", 16L -> "sixteen", 17L -> "seventeen",
-        18L -> "eighteen", 19L -> "nineteen")
+      14L -> "fourteen", 15L -> "fifteen", 16L -> "sixteen", 17L -> "seventeen",
+      18L -> "eighteen", 19L -> "nineteen")
 
   val TwentyTo99: Lexicon =
     Set(20L -> "twenty", 30L -> "thirty", 40L -> "forty",
@@ -78,16 +89,7 @@ object Lexicon {
 
   val OneTo99: Lexicon = TwentyTo99 ++ TenToNineteen ++ OneToNine
 
-  private val Hundreds = LexiconEntry(100, "hundred")
+  private val Hundred = LexiconEntry(100, " hundred")
 
-  val OneTo999: Lexicon = Seq(Hundreds) ++ OneTo99
-
-  private val Thousands = LexiconEntry(1000, "thousand")
-
-  private val Millions = LexiconEntry(1000000, "million")
-
-  private val Billions = LexiconEntry(1000000000, "billion")
-
-  val NumberLexicon: Lexicon =
-    Seq(Billions, Millions, Thousands, Hundreds) ++ OneTo99 //:+ Zero
+  val OneTo999: Lexicon = Seq(Hundred) ++ OneTo99
 }
