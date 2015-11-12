@@ -10,6 +10,7 @@ target/
 *.iws
 out/
 *.swp
+java/
 bin/
 .cache-*
 .metadata/
