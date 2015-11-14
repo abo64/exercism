@@ -1,42 +1,39 @@
+import scala.annotation.tailrec
 import RomanNumeral._
 
-class RomanNumeral(number: ArabicNumber) {
-  lazy val value: RomanNumber = {
-    def decimalFactor(n: Int) = math.pow(10, n) toInt
-    val digitsWithIndex: Seq[(Char, Int)] =
-      number.toString.reverse.zipWithIndex.reverse
-    val digitsWithDecimalFactor: Seq[(Int, Int)] =
-      digitsWithIndex map { case (digit, index) =>
-        (digit.toString.toInt, decimalFactor(index)) }
-    digitsWithDecimalFactor map digitToRoman mkString
-  }
+class RomanNumeral(arabicNumber: ArabicNumber) {
+
+  lazy val value: RomanNumber =
+    toRoman(arabicNumber)
 }
 
 object RomanNumeral {
-  type ArabicNumber = Int
-  type RomanNumber = String
+  private type ArabicNumber = Int
+  private type RomanNumber = String
 
   def apply(number: ArabicNumber) = new RomanNumeral(number)
 
-  // not really elegant, but at least it seems to work
-  val digitToRoman = {
-    val decimalFactorToRoman: Map[Int, (String, String, String)] = Map(
-      1 -> ("I", "V", "IX"),
-      10 -> ("X", "L", "XC"),
-      100 -> ("C", "D", "CM"),
-      1000 -> ("M", "ↁ", "Mↂ")
-    )
-
-    def asRomanNumber(digit: ArabicNumber, factor: Int): RomanNumber = {
-      val (one, five, nine) = decimalFactorToRoman(factor)
-
-      if (digit == 0) ""
-      else if (digit <= 3) one * digit
-      else if (digit == 4)  one + five
-      else if (digit <= 8) five + (one * (digit - 5))
-      else nine
+  @tailrec
+  private def toRoman(number: ArabicNumber, result: RomanNumber = ""): RomanNumber =
+    ArabicToRoman.find(_._1 <= number) match {
+      case None => result
+      case Some((digitValue, romanDigit)) =>
+        toRoman(number - digitValue, result + romanDigit)
     }
 
-    (asRomanNumber _).tupled
-  }
+  private[this] val ArabicToRoman = Seq(
+    1000 -> "M",
+    900  -> "CM",
+    500  -> "D",
+    400  -> "CD",
+    100  -> "C",
+    90   -> "XC",
+    50   -> "L",
+    40   -> "XL",
+    10   -> "X",
+    9    -> "IX",
+    5    -> "V",
+    4    -> "IV",
+    1    -> "I"
+  )
 }
