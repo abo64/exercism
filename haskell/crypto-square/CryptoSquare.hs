@@ -17,7 +17,7 @@ normalizePlaintext =
 
 squareSize :: PlainText -> SquareSize
 squareSize =
- ceiling . sqrt . fromIntegral . length
+ ceiling . sqrt . (fromIntegral :: Int -> Double) . length
 
 plaintextSegments :: PlainText -> PlainTextSegments
 plaintextSegments plainText =
