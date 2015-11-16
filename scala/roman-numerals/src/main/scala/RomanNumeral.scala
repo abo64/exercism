@@ -1,4 +1,3 @@
-import scala.annotation.tailrec
 import RomanNumeral._
 
 class RomanNumeral(arabicNumber: ArabicNumber) {
@@ -13,13 +12,20 @@ object RomanNumeral {
 
   def apply(number: ArabicNumber) = new RomanNumeral(number)
 
-  @tailrec
-  private def toRoman(number: ArabicNumber, result: RomanNumber = ""): RomanNumber =
+  private[this] def findNext(number: ArabicNumber) =
     ArabicToRoman.find(_._1 <= number) match {
-      case None => result
-      case Some((digitValue, romanDigit)) =>
-        toRoman(number - digitValue, result + romanDigit)
+      case None => None
+      case Some((numberValue, romanNumber)) => Some((romanNumber, number - numberValue))
     }
+
+  private def toRoman(number: ArabicNumber): RomanNumber =
+    unfoldRight(number)(findNext) mkString
+
+  private[this] def unfoldRight[A,B](seed: B)(f: B => Option[(A,B)]): Seq[A] =
+    f(seed) match {
+    case None => Seq()
+    case Some((a,b)) => a +: unfoldRight(b)(f)
+  }
 
   private[this] val ArabicToRoman = Seq(
     1000 -> "M",
