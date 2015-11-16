@@ -3,22 +3,20 @@ module Robot (robotName, mkRobot, resetName) where
 import System.Random (newStdGen, randomRs)
 import Data.IORef
 
-newtype Robot = Robot { nameRef :: IORef String }
+type Robot = IORef String
 
 robotName :: Robot -> IO String
-robotName robot =
-  readIORef (nameRef robot)
+robotName = readIORef
 
 mkRobot :: IO Robot
 mkRobot = do
   name <- newName
-  nameR <- newIORef name
-  return (Robot nameR)
+  newIORef name
 
 resetName :: Robot -> IO ()
 resetName robot = do
   name <- newName
-  writeIORef (nameRef robot) name
+  writeIORef robot name
 
 newName :: IO String
 newName = do
