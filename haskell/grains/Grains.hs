@@ -4,8 +4,8 @@ type Grains = Integer
 type ChessboardSquares = Int
 
 square :: ChessboardSquares -> Grains
-square chessboardSquares =
-  2 ^ (chessboardSquares - 1)
+square =
+  (2^) . pred
 
 total :: Grains
 total =

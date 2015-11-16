@@ -18,4 +18,3 @@ library
   -- exposed-modules:     
   -- other-modules:       
   build-depends:       base ==4.6.*
-  other-modules:       Grains
