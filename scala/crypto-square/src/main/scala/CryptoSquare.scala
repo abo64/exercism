@@ -1,3 +1,5 @@
+import scala.annotation.tailrec
+
 object CryptoSquare {
 
   // needed for the tests to compile and run
@@ -29,27 +31,26 @@ object CryptoSquare {
   }
 
   def normalizedCiphertext(text: PlainText): NormalizedCipherText = {
-    def charAt(charPos: Int): PartialFunction[String, Char] =
-      { case str if str.length > charPos => str.charAt(charPos) }
-    def charsAtSamePosToString(segments: PlainTextSegments)(charPos: Int): String =
-      segments collect charAt(charPos) mkString
-
     val segments = plaintextSegments(text)
-    val segmentMaxLength = segments map (_.length) max
-    val segmentCharPositions = (0 to segmentMaxLength)
-    val cypherSegments: Seq[String] =
-      segmentCharPositions map charsAtSamePosToString(segments)
-    cypherSegments filter (_.nonEmpty) mkString (" ")
+    val segmentsAsCharSeqs: Seq[Seq[Char]] = segments map (_.toSeq)
+    val cipherSegmentsAsCharSeqs: Seq[Seq[Char]] = zipN(segmentsAsCharSeqs:_*)
+    val cipherSegments: Seq[String] = cipherSegmentsAsCharSeqs map (_.mkString)
+    cipherSegments mkString(" ")
+  }
 
-    // the first idea is not always best
-//    val indexedChars: List[(Char, Int)] =
-//      plaintextSegments(text) flatMap (_.zipWithIndex)
-//    val charsGroupedByPosition = SortedMap(indexedChars groupBy (_._2) toSeq: _*)
-//    val charsByPosition: Seq[List[(Char, Int)]] = charsGroupedByPosition.values toSeq
-//    val stringsAsCharSeq: Seq[List[Char]] = charsByPosition.map(_.map(_._1))
-//    stringsAsCharSeq map (_.mkString) mkString (" ")
+  private def zipN[T](seqs: Seq[T]*): Seq[Seq[T]] = {
+    @tailrec
+    def loop(seqs: Seq[Seq[T]], acc: Seq[Seq[T]]): Seq[Seq[T]] =
+      if (seqs.isEmpty) acc
+      else {
+        val heads = seqs flatMap (_.take(1))
+        val tails = seqs map (_.drop(1)) filterNot (_.isEmpty)
+        loop(tails, acc :+ heads)
+      }
+
+    loop(seqs, Seq())
   }
 
   def ciphertext(text: PlainText): CipherText =
-    normalizedCiphertext(text) filter (_.isLetterOrDigit)
+    normalizedCiphertext(text) filterNot (_.isSpaceChar)
 }
