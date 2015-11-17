@@ -4,7 +4,6 @@ import qualified Data.Map.Strict as Map
 import Data.List (sort)
 import Data.List.Split (chunksOf)
 import Data.Maybe (fromJust)
-import Control.Applicative ((<$>))
 
 data Plant = Violets | Clover | Radishes | Grass
   deriving (Eq, Show)
@@ -22,12 +21,16 @@ garden children gardenLayout =
   where
     sortedChildren :: Children
     sortedChildren = sort children
+
     plantsPerChild :: [Plants]
     plantsPerChild = zipWith (++) (head plantRowsPerChild) (head $ tail plantRowsPerChild)
+
     plantRowsPerChild :: [[Plants]]
     plantRowsPerChild = map (chunksOf 2) plantRows
+
     plantRows :: [Plants]
     plantRows = map cupsToPlants $ lines gardenLayout
+
     cupsToPlants :: [Cup] -> Plants
     cupsToPlants = map $ fromJust . flip Map.lookup cupToPlant
 
@@ -35,7 +38,7 @@ defaultGarden :: GardenLayout -> Garden
 defaultGarden = garden defaultChildren
 
 lookupPlants :: Child -> Garden -> Plants
-lookupPlants child = fromJust <$> Map.lookup child
+lookupPlants = flip (Map.!)
 
 defaultChildren :: Children
 defaultChildren =
