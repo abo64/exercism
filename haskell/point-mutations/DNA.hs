@@ -2,8 +2,7 @@ module DNA (hammingDistance) where
 
 hammingDistance :: String -> String -> Int
 hammingDistance strand1 strand2 =
-  length differentNucleotides
+  sum nucleotideDistances
     where
-      differentNucleotide (n1, n2) = n1 /= n2
-      strands = (zip strand1 strand2)
-      differentNucleotides = filter differentNucleotide strands
+      nucleotideDistances = zipWith nucleotideDistance strand1 strand2
+      nucleotideDistance = (fromEnum .) . (/=)
