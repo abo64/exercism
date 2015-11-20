@@ -1,4 +1,3 @@
-import scala.annotation.tailrec
 import Binary._
 
 class Binary(input: BinaryInput) {
@@ -18,14 +17,13 @@ object Binary {
     def isValidInput(in: BinaryInput) =
       in.nonEmpty && (in forall (c => c == '0' || c == '1'))
 
-    def toDecimal(in: BinaryInput): BinaryOutput = {
-      @tailrec def loop(oct: Seq[Char], result: Int): Int = oct match {
-        case Nil => result
-        case h +: t => loop(t, result * 2 + h.asDigit)
+    def toDecimal(in: BinaryInput): BinaryOutput =
+      in.foldLeft(0) {
+        case (output, char) => output * 2 + char.asDigit
       }
-
-      loop(in, 0)
-    }
+//      in.reverse.foldRight(0) {
+//        case (char, output) => output * 2 + char.asDigit
+//      }
 
     Option(input) filter isValidInput map toDecimal
   }
