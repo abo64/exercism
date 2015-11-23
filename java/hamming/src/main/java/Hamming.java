@@ -8,17 +8,18 @@ public class Hamming {
         if (strand1.length() != strand2.length())
             throw new IllegalArgumentException("different strand lengths");
 
-        Stream<Pair<Character,Character>> nucleotidePairs =
-            zip(characterStream(strand1), characterStream(strand2));
+        Stream<NucleotidePair> nucleotidePairs = pairStrands(strand1, strand2);
         long count =
             nucleotidePairs
-                .filter(differentNucleotides)
+                .filter(NucleotidePair::differentNucleotides)
                 .count();
         return (int)count;
     }
 
-    private static final Predicate<Pair<Character, Character>> differentNucleotides =
-        nucleotidePair -> nucleotidePair.getFirst() != nucleotidePair.getSecond();
+    private static Stream<NucleotidePair> pairStrands(String strand1, String strand2) {
+        return zip(characterStream(strand1), characterStream(strand2))
+                 .map(NucleotidePair::new);
+    }
 
     private static <A,B> Stream<Pair<A,B>> zip(Stream<A> as, Stream<B> bs) {
         // is there a better way than using an iterator?
@@ -31,6 +32,16 @@ public class Hamming {
 
     private static Stream<Character> characterStream(String str) {
         return str.chars().mapToObj(i -> (char)i);
+    }
+
+    private static class NucleotidePair extends Pair<Character, Character> {
+        private NucleotidePair(Pair<Character, Character> pair) {
+            super(pair.first, pair.second);
+        }
+
+        boolean differentNucleotides() {
+            return getFirst() != getSecond();
+        }
     }
 
     private static class Pair<F,S> {
