@@ -1,27 +1,24 @@
 object Hexadecimal {
 
-  type HexDigit = Char
+  type HexChar = Char
   type Hex = String
 
   private val InvalidHex = 0
 
-  private val HexDigits: Seq[HexDigit] =
+  private val HexChars: Seq[HexChar] =
     ('0' to '9') ++ ('a' to 'f')
 
   private def isValidHex(hex: Hex) =
-    hex.nonEmpty && (hex.toLowerCase forall HexDigits.contains)
+    hex.nonEmpty && (hex.toLowerCase forall HexChars.contains)
 
   private def toInt(hex: Hex): Int = {
-    def hexDigitWithIndexToInt(hexDigit: HexDigit, index: Int): Int = {
-      val hexFactor = math.pow(16, index).toInt
-      val hexDigitAsInt = HexDigits.indexOf(hexDigit.toLower)
-      hexDigitAsInt * hexFactor
-    }
+    def asInt(hexChar: HexChar): Int =
+      HexChars indexOf hexChar.toLower
 
-    val hexDigitsWithIndex: Seq[(HexDigit, Int)] =
-      hex.reverse zipWithIndex
+    def next(int: Int, hexChar: HexChar): Int =
+      int * 16 + asInt(hexChar)
 
-    hexDigitsWithIndex map hexDigitWithIndexToInt sum
+    hex.foldLeft(0)(next)
   }
 
   def hexToInt(hex: Hex): Int =
