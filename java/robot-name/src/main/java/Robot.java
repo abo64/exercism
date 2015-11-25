@@ -12,7 +12,14 @@ public class Robot {
     public void reset() { this.name = randomName(); }
 
     private static String randomName() {
-        return twoRandomUpperLetters() + threeRandomIntegers();
+        String candidate =
+            twoRandomUpperLetters() + threeRandomIntegers();
+
+        if (isUnusedName(candidate)) {
+            return candidate;
+        } else {
+            return randomName();
+        }
     }
 
     private static String twoRandomUpperLetters() {
@@ -26,18 +33,13 @@ public class Robot {
     private static String randomChars(int howMany, char lowerBound, char upperBound) {
         Stream<Character> randomUpperChars =
             new Random().ints(lowerBound, upperBound + 1).mapToObj(i -> (char)i);
-        String candidate =
+        return
             randomUpperChars
               .limit(howMany)
               .collect(StringBuilder::new,
                        (sb, i) -> sb.append((char)i),
                        StringBuilder::append)
               .toString();
-        if (isUnusedName(candidate)) {
-            return candidate;
-        } else {
-            return randomChars(howMany, lowerBound, upperBound);
-        }
     }
 
     private static Set<String> usedNames = new HashSet<>();
