@@ -1,5 +1,4 @@
 import Luhn._
-import scala.annotation.tailrec
 
 class Luhn(number: Number) {
 
@@ -9,7 +8,7 @@ class Luhn(number: Number) {
   lazy val addends: Digits = {
     val digitsWithIndex =
       number.toString.map(_.asDigit).reverse.zipWithIndex.reverse
-    digitsWithIndex map transformDigit
+    digitsWithIndex map luhnTransform
   }
 
   lazy val checksum: Checksum =
@@ -18,8 +17,11 @@ class Luhn(number: Number) {
   lazy val isValid: Boolean =
     checksum == 0
 
-  lazy val create: Number =
-    createLuhn(number)
+  lazy val create: Number = {
+    val isValidLuhn = Luhn(_:Number).isValid
+    val candidates = (0 to 9) map (number*10 + _)
+    candidates filter isValidLuhn head
+  }
 }
 
 object Luhn {
@@ -30,24 +32,14 @@ object Luhn {
 
   def apply(number: Number) = new Luhn(number)
 
-  private def transformDigit(digit: Digit, index: Int): Digit = {
-    val isSecondDigit = (index + 1) % 2 == 0
-    if (isSecondDigit) {
+  private def luhnTransform(digit: Digit, index: Int): Digit = {
+    def odd(number: Int) = number % 2 != 0
+    def luhnTransformedDigit: Digit = {
       val doubledDigit = digit * 2
-      val result =
-        if (doubledDigit > 9) doubledDigit - 9 else doubledDigit
-      result
-    } else digit
-  }
-
-  private def createLuhn(number: Number): Number = {
-    @tailrec def loop(checkDigit: Digit): Number = {
-      val candidate: Number = (number.toString + checkDigit).toLong
-      if (Luhn(candidate).isValid) candidate
-      else loop(checkDigit + 1)
+      if (doubledDigit > 9) doubledDigit - 9 else doubledDigit
     }
 
-    loop(0)
+    if (odd(index)) luhnTransformedDigit else digit
   }
 
   implicit def function2AsTupled[A,B,C](f: (A,B) => C): ((A,B)) => C =

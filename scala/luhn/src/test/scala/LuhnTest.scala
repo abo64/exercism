@@ -17,6 +17,7 @@ class LuhnTest extends FlatSpec with Matchers {
     //        be mod 10 like we are testing here.
     Luhn(4913).checksum should equal(2)
     Luhn(201773).checksum should equal(1)
+    Luhn(2323200577663554L).checksum should equal(0)
   }
 
   it should "check validity" in {
