@@ -1,10 +1,12 @@
+import scala.collection.SortedMap
+
 object Raindrops {
 
   // needed for the tests to compile and run
   def apply() = this
 
   private val Raindrops =
-    Map(3 -> "Pling", 5 -> "Plang", 7 -> "Plong")
+    SortedMap(3 -> "Pling", 5 -> "Plang", 7 -> "Plong")
 
   def convert(number: Int): String = {
     def hasPrimeFactor(primeFactor: Int): Boolean =
