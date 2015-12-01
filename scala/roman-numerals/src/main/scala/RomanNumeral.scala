@@ -13,9 +13,8 @@ object RomanNumeral {
   def apply(number: ArabicNumber) = new RomanNumeral(number)
 
   private[this] def findNext(number: ArabicNumber) =
-    ArabicToRoman.find(_._1 <= number) match {
-      case None => None
-      case Some((numberValue, romanNumber)) => Some((romanNumber, number - numberValue))
+    ArabicToRoman.find(_._1 <= number) map {
+      case (numberValue, romanNumber) => (romanNumber, number - numberValue)
     }
 
   private def toRoman(number: ArabicNumber): RomanNumber =
