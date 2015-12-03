@@ -8,17 +8,27 @@ object PrimeFactors {
   type Factors = List[Int]
 
   def primeFactors(number: Long): Factors = {
-    @tailrec def loop(dividend: Long, divisor: Int, factors: Factors): Factors = {
-      if (dividend == 1) factors.reverse
-      else if (divisor goesCleanlyInto dividend) loop(dividend / divisor, divisor, divisor :: factors)
-      else loop(dividend, divisor + 1, factors)
-    }
+    unfoldRight((number, 2))(findNext)
+  }
 
-    loop(number, 2, List())
+  private type Division = (Long, Int)
+
+  @tailrec
+  private def findNext(division: Division): Option[(Int,Division)] = {
+    val (dividend, divisor) = division
+    if (dividend == 1) None
+    else if (divisor goesCleanlyInto dividend) Some(divisor, (dividend / divisor, divisor))
+    else findNext((dividend, divisor + 1))
   }
 
   implicit class IntOps(divisor: Int) {
     def goesCleanlyInto(dividend: Long): Boolean =
       dividend % divisor == 0
+  }
+
+  private def unfoldRight[A,B](seed: B)(f: B => Option[(A,B)]): List[A] =
+    f(seed) match {
+    case None => Nil
+    case Some((a,b)) => a :: unfoldRight(b)(f)
   }
 }
