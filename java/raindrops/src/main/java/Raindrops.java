@@ -1,44 +1,37 @@
-import java.util.Optional;
-import java.util.function.Function;
+import java.util.Arrays;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class Raindrops {
 
     public static String convert(int number) {
+        Predicate<Raindrop> keepRaindrop =
+            raindrop -> raindrop.hasPrimeFactor(number);
+
         return rainDrops()
-                 .map(primeFactorToRaindrop(number))
-                 .filter(Optional::isPresent)
-                 .map(Optional::get)
+                 .filter(keepRaindrop)
+                 .map(Raindrop::toString)
                  .reduce(String::concat)
                  .orElse(Integer.toString(number));
     }
 
-    private static Function<Pair<Integer,String>,Optional<String>> primeFactorToRaindrop(int number) {
-        Predicate<Pair<Integer, String>> isRaindrop =
-            raindrop -> hasPrimeFactor(number, raindrop.first);
-        return
-            raindrop -> Optional.of(raindrop).filter(isRaindrop).map(rd -> rd.second);
+    private static Stream<Raindrop> rainDrops() {
+        return Arrays.stream(Raindrop.values());
     }
 
-    public static boolean hasPrimeFactor(int number, int primeFactor) {
-        return number % primeFactor == 0;
-    }
+    private enum Raindrop {
+        Pling(3),
+        Plang(5),
+        Plong(7);
 
-    private static Stream<Pair<Integer,String>> rainDrops() {
-        return Stream.of(
-                new Pair<Integer,String>(3, "Pling"),
-                new Pair<Integer,String>(5, "Plang"),
-                new Pair<Integer,String>(7, "Plong"));
-    }
+        private final int primeFactor;
 
-    private static class Pair<F,S> {
-        private F first;
-        private S second;
+        private Raindrop(int primeFactor) {
+            this.primeFactor = primeFactor;
+        }
 
-        private Pair(F first, S second) {
-            this.first = first;
-            this.second = second;
+        private boolean hasPrimeFactor(int number) {
+            return number % primeFactor == 0;
         }
     }
 }
