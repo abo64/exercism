@@ -7,24 +7,11 @@ object Allergies {
 
   type Score = Int
 
-  def isAllergicTo(allergen: Allergen, score: Score): Boolean =
-    isInScore(score)(allergen)
+  def isAllergicTo(allergen: Allergen.Allergen, score: Score) =
+    (allergen.value & score) == allergen.value
 
   def allergies(score: Score): Allergens =
-    AllAllergens filter isInScore(score)
-
-  private def isInScore(score: Score)(allergen: Allergen): Boolean =
-    scoreToValues(score)(allergen.value)
-
-  private def scoreToValues(score: Score): Set[Value] = {
-    def binaryWithIndexToValue: PartialFunction[(Char,Int),Value] = {
-      case (char, index) if char == '1' => math.pow(2, index) toInt
-    }
-
-    val binariesWithIndex: Seq[(Char, Int)] =
-      score.toBinaryString.reverse.zipWithIndex
-    binariesWithIndex collect binaryWithIndexToValue toSet
-  }
+    AllAllergens filter (isAllergicTo(_, score))
 }
 
 object Allergen {
