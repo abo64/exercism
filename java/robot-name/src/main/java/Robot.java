@@ -1,6 +1,7 @@
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class Robot {
@@ -12,14 +13,19 @@ public class Robot {
     public void reset() { this.name = randomName(); }
 
     private static String randomName() {
-        String candidate =
-            twoRandomUpperLetters() + threeRandomIntegers();
+        return randomNames()
+                .filter(Robot::isUnusedName)
+                .findFirst().get();
+    }
 
-        if (isUnusedName(candidate)) {
-            return candidate;
-        } else {
-            return randomName();
-        }
+    private static final Supplier<String> RandomNameSupplier =
+        new Supplier<String>() {
+            @Override public String get() {
+                return twoRandomUpperLetters() + threeRandomIntegers();
+            }};
+
+    private static Stream<String> randomNames() {
+        return Stream.generate(RandomNameSupplier);
     }
 
     private static String twoRandomUpperLetters() {
