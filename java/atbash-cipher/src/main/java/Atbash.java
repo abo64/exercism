@@ -1,6 +1,7 @@
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -48,7 +49,7 @@ public class Atbash {
         zip(alphabet(), alphabet().sorted(Comparator.reverseOrder()))
           .collect(pairsToMap());
     private static final Function<Character, Character> atbashEncode =
-            character -> AtbashEncodeMap.getOrDefault(character, character);
+            mapToFunction(AtbashEncodeMap, Function.identity());
 
 
     private static final Map<Character, Character> AtbashDecodeMap =
@@ -56,8 +57,12 @@ public class Atbash {
           .map(Pair::flip)
           .collect(pairsToMap());
     private static final Function<Character, Character> atbashDecode =
-            character -> AtbashDecodeMap.getOrDefault(character, character);
+            mapToFunction(AtbashDecodeMap, Function.identity());
 
+
+    private static <K, V> Function<K, V> mapToFunction(Map<K, V> map, Function<K,V> computeIfAbsent) {
+        return key -> map.getOrDefault(key, computeIfAbsent.apply(key));
+    }
 
     private static Stream<Character> alphabet() {
         return IntStream.rangeClosed('a', 'z').mapToObj(i -> (char)i);
