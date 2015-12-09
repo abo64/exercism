@@ -1,42 +1,28 @@
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
 public class Strain {
 
     public static <T> List<T> keep(List<T> ts, Predicate<T> p) {
-        Optional<T> maybeHead = head(ts);
-        if (!maybeHead.isPresent()) {
-            return Collections.emptyList();
-        } else {
-            T head = maybeHead.get();
-            List<T> tail = tail(ts).get();
-            List<T> keepTail = keep(tail, p);
-            return p.test(head) ?
-                cons(head, keepTail) :
-                keepTail;
-        }
+        return foldLeft(ts,
+                 new ArrayList<T>(),
+                 (filteredTs, t) -> {
+                     if (p.test(t)) filteredTs.add(t);
+                     return filteredTs;
+                 });
     }
 
     public static <T> List<T> discard(List<T> ts, Predicate<T> p) {
         return keep(ts, p.negate());
     }
 
-    private static <T> List<T> cons(T t, List<T> ts) {
-        List<T> result = new ArrayList<>(ts);
-        result.add(0, t);
+    private static <A, B> B foldLeft(Iterable<A> as, B z, BiFunction<B,A,B> f) {
+        B result = z;
+        for (A a : as) {
+            result = f.apply(result, a);
+        }
         return result;
-    }
-
-    private static <T> Optional<T> head(List<T> ts) {
-        if (ts.isEmpty()) return Optional.empty();
-        else return Optional.of(ts.get(0));
-    }
-
-    private static <T> Optional<List<T>> tail(List<T> ts) {
-        if (ts.isEmpty()) return Optional.empty();
-        else return Optional.of(ts.subList(1, ts.size()));
     }
 }
