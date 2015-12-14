@@ -1,16 +1,17 @@
+import scala.collection.mutable.ListBuffer
+
 object Sieve {
   type Prime = Int
 
   def primesUpTo(n: Int): Seq[Prime] =
-    primes takeWhile (_ <= n)
+    (2 to n).foldLeft(ListBuffer[Int]())(addIfPrime) toSeq
 
-  private val primes: Stream[Int] = {
-    def sqrLessEqualThan(j: Int, i: Int) = j * j <= i
-    def notDivisibleBy(i: Int, k: Int) = i % k > 0
+  private def addIfPrime(primes: ListBuffer[Int], n: Int): ListBuffer[Int] = {
+    def squareLE(i: Int) = i*i <= n
+    def notDivisibleBy(i: Int) = n % i > 0
 
-    2 #:: Stream.from(3, 2).filter { i =>
-      primes.takeWhile(sqrLessEqualThan(_, i))
-            .forall(notDivisibleBy(i, _))
-    }
+    val isPrime = (primes takeWhile squareLE) forall notDivisibleBy
+    if (isPrime) primes += n
+    else primes
   }
 }
