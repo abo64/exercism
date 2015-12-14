@@ -2,6 +2,7 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Robot {
@@ -38,14 +39,15 @@ public class Robot {
 
     private static String randomChars(int howMany, char lowerBound, char upperBound) {
         Stream<Character> randomUpperChars =
-            new Random().ints(lowerBound, upperBound + 1).mapToObj(i -> (char)i);
-        return
-            randomUpperChars
-              .limit(howMany)
-              .collect(StringBuilder::new,
-                       (sb, i) -> sb.append((char)i),
-                       StringBuilder::append)
-              .toString();
+            new Random().ints(lowerBound, upperBound + 1)
+              .mapToObj(i -> (char)i)
+              .limit(howMany);
+        return mkString(randomUpperChars);
+    }
+
+    private static <A> String mkString(Stream<A> as) {
+        return as.map(Object::toString)
+                 .collect(Collectors.joining(""));
     }
 
     private static Set<String> usedNames = new HashSet<>();

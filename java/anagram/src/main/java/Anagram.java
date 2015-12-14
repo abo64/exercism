@@ -28,16 +28,17 @@ public class Anagram {
             }};
 
     private static String sortedCharsStr(String str) {
-        return characterStream(str)
-                 .sorted()
-                 .collect(StringBuilder::new,
-                          (sb, i) -> sb.append((char)i),
-                          StringBuilder::append)
-                 .toString();
+        Stream<Character> sortedChars =
+            characterStream(str).sorted();
+        return mkString(sortedChars);
     }
 
     private static Stream<Character> characterStream(String str) {
         return str.chars().mapToObj(i -> (char)i);
     }
 
+    private static <A> String mkString(Stream<A> as) {
+        return as.map(Object::toString)
+                 .collect(Collectors.joining(""));
+    }
 }

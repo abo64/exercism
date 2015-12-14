@@ -1,8 +1,8 @@
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -12,36 +12,26 @@ import java.util.stream.Stream;
 public class Atbash {
 
     public static String encode(String plainText) {
-        return characterStream(plainText.toLowerCase())
+        Stream<Character> encodedStream =
+            characterStream(plainText.toLowerCase())
                 .filter(Character::isLetterOrDigit)
-                .map(atbashEncode)
-                .collect(StringBuilder::new,
-                         grouped(5),
-                         StringBuilder::append)
-               .toString();
+                .map(atbashEncode);
+
+        List<String> groups = grouped(mkString(encodedStream), 5);
+        return groups.stream().collect(Collectors.joining(" "));
     }
 
     public static String decode(String cipherText) {
-        return characterStream(cipherText)
+        Stream<Character> decodedStream =
+            characterStream(cipherText)
                  .filter(c -> c != ' ')
-                 .map(atbashDecode)
-                 .collect(StringBuilder::new,
-                          (sb, i) -> sb.append((char)i),
-                          StringBuilder::append)
-                .toString();
+                 .map(atbashDecode);
+        return mkString(decodedStream);
     }
 
-    private static BiConsumer<StringBuilder, Character> grouped(int groupSize) {
-        // not really elegant: is there a better way to group a Character Stream?
-        AtomicInteger dynamicGroupSize = new AtomicInteger(groupSize);
-        return (sb, i) -> {
-            int length = sb.length();
-            if (length > 0 && length % dynamicGroupSize.get() == 0) {
-                sb.append(' ');
-                dynamicGroupSize.addAndGet(groupSize + 1);
-            }
-            sb.append((char) i);
-        };
+    private static List<String> grouped(String str, int groupSize) {
+        String regex = String.format("(?<=\\G.{%d})", groupSize);
+        return Arrays.asList(str.split(regex));
     }
 
     private static final Map<Character, Character> AtbashEncodeMap =
@@ -69,6 +59,11 @@ public class Atbash {
 
     private static Stream<Character> characterStream(String str) {
         return str.chars().mapToObj(i -> (char)i);
+    }
+
+    private static <A> String mkString(Stream<A> as) {
+        return as.map(Object::toString)
+                 .collect(Collectors.joining(""));
     }
 
     private static <K, V> Stream<Pair<K, V>> mapToPairStream(Map<K, V> source) {

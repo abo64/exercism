@@ -2,6 +2,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class PhoneNumber {
@@ -62,18 +63,15 @@ public class PhoneNumber {
     private String filterChars(String str, Predicate<Character> filterPredicate) {
         Stream<Character> filteredChars =
             characterStream(str).filter(filterPredicate);
-        return toString(filteredChars);
-    }
-
-    private static String toString(Stream<Character> characterStream) {
-        return characterStream
-                .collect(StringBuilder::new,
-                        (sb, i) -> sb.append((char)i),
-                        StringBuilder::append)
-               .toString();
+        return mkString(filteredChars);
     }
 
     private static Stream<Character> characterStream(String str) {
         return str.chars().mapToObj(i -> (char)i);
+    }
+
+    private static <A> String mkString(Stream<A> as) {
+        return as.map(Object::toString)
+                 .collect(Collectors.joining(""));
     }
 }
