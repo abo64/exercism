@@ -8,7 +8,7 @@ object CryptoSquare {
   type PlainText = String
   type NormalizedPlainText = String
   type SquareSize = Int
-  type PlainTextSegments = List[String]
+  type TextSegments = Seq[String]
   type NormalizedCipherText = String
   type CipherText = String
 
@@ -17,40 +17,33 @@ object CryptoSquare {
 
   def squareSize(text: PlainText): SquareSize = {
     import math._
-    val textLength = text.length
+    val textLength = normalizePlaintext(text).length
     ceil(sqrt(textLength)) toInt
   }
 
   private val EmptyPlainTextSegments = List("")
 
-  def plaintextSegments(text: PlainText): PlainTextSegments = {
+  def plaintextSegments(text: PlainText): TextSegments = {
     val normalizedPlainText = normalizePlaintext(text)
 
     if (normalizedPlainText.isEmpty) EmptyPlainTextSegments
     else normalizedPlainText grouped squareSize(normalizedPlainText) toList
   }
 
-  def normalizedCiphertext(text: PlainText): NormalizedCipherText = {
+  private def cipherTextSegments(text: PlainText): TextSegments = {
+    def addRowChar(col: Int)(cipherText: CipherText, plainTextRow: PlainText): CipherText =
+      plainTextRow.lift(col) map (cipherText + _) getOrElse cipherText
+
     val segments = plaintextSegments(text)
-    val segmentsAsCharSeqs: Seq[Seq[Char]] = segments map (_.toSeq)
-    val cipherSegmentsAsCharSeqs: Seq[Seq[Char]] = zipN(segmentsAsCharSeqs:_*)
-    val cipherSegments: Seq[String] = cipherSegmentsAsCharSeqs map (_.mkString)
-    cipherSegments mkString(" ")
+    val squareColumns = (0 until squareSize(text))
+    squareColumns map { col =>
+      segments.foldLeft("")(addRowChar(col))
+    }
   }
 
-  private def zipN[T](seqs: Seq[T]*): Seq[Seq[T]] = {
-    @tailrec
-    def loop(seqs: Seq[Seq[T]], acc: Seq[Seq[T]]): Seq[Seq[T]] =
-      if (seqs.isEmpty) acc
-      else {
-        val heads = seqs flatMap (_.take(1))
-        val tails = seqs map (_.drop(1)) filterNot (_.isEmpty)
-        loop(tails, acc :+ heads)
-      }
-
-    loop(seqs, Seq())
-  }
+  def normalizedCiphertext(text: PlainText): NormalizedCipherText =
+    cipherTextSegments(text) mkString(" ")
 
   def ciphertext(text: PlainText): CipherText =
-    normalizedCiphertext(text) filterNot (_.isSpaceChar)
+    cipherTextSegments(text) mkString
 }
