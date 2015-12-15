@@ -7,7 +7,7 @@ import Data.List.Split (chunksOf)
 type PlainText = String
 type NormalizedPlainText = String
 type SquareSize = Int
-type PlainTextSegments = [String]
+type TextSegments = [String]
 type NormalizedCipherText = String
 type CipherText = String
 
@@ -17,27 +17,30 @@ normalizePlaintext =
 
 squareSize :: PlainText -> SquareSize
 squareSize =
- ceiling . sqrt . (fromIntegral :: Int -> Double) . length
+ ceiling . sqrt . (fromIntegral :: Int -> Double) . length . normalizePlaintext
 
-plaintextSegments :: PlainText -> PlainTextSegments
+plaintextSegments :: PlainText -> TextSegments
 plaintextSegments plainText =
-  chunksOf (squareSize normalizedPlainText) normalizedPlainText
+  chunksOf (squareSize plainText) normalizedPlainText
   where normalizedPlainText = normalizePlaintext plainText
 
 ciphertext :: PlainText -> CipherText
-ciphertext =
-  filter (not . isSpace) . normalizeCiphertext
+ciphertext = concat . cipherTextSegments
 
 normalizeCiphertext :: PlainText -> NormalizedCipherText
-normalizeCiphertext =
-  unwords . zipN . plaintextSegments
+normalizeCiphertext = unwords . cipherTextSegments
 
-zipN :: [[a]] -> [[a]]
-zipN [] = []
-zipN xs = heads xs : zipN (tails xs)
+cipherTextSegments :: PlainText -> TextSegments
+cipherTextSegments plainText =
+  map foldSegments squareColumns
   where
-    heads :: [[a]] -> [a]
-    heads = concatMap $ take 1
+    textSegments = plaintextSegments plainText
+    squareColumns = [0..pred $ squareSize plainText]
 
-    tails :: [[a]] -> [[a]]
-    tails = filter (not . null) . map (drop 1)
+    foldSegments :: Int -> CipherText
+    foldSegments col = foldl (addRowChar col) "" textSegments
+
+    addRowChar :: Int -> CipherText -> PlainText -> CipherText
+    addRowChar col cipherText plainTextRow
+      | col < length plainTextRow = cipherText ++ [plainTextRow !! col]
+      | otherwise = cipherText
