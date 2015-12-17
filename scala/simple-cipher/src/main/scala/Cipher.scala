@@ -6,16 +6,30 @@ class Cipher(val key: Key) {
   require(key forall (_.isLower), s"Invalid key - contains caps or numerics: $key")
 
   def encode(clearText: ClearText): CipherText =
-    clearText.zipWithIndex map shift(Right) mkString
+    shiftText(clearText, Right)
 
   def decode(cipherText: CipherText): ClearText =
-    cipherText.zipWithIndex map shift(Left) mkString
+    shiftText(cipherText, Left)
 
-  private def shift(right: Boolean)(char: Char, pos: Int): Char = {
-    val sign: Int => Int = if (right) (+ _) else (- _)
-    val offset = (key(pos % key.size) - ZeroOffset)
-    val int = ZeroOffset + ((char.toInt + sign(offset) - ZeroOffset) % MaxShift)
-    int.toChar
+  private val keyOffsets = {
+    def distanceFromA(char: Char): Int = char.toInt - 'a'.toInt
+
+    val cyclicKeyChars = Stream.continually(key).flatten
+    cyclicKeyChars map distanceFromA
+  }
+
+  private def shiftText(text: String, direction: Int => Int): String = {
+    val shiftChar: (Char,Int) => Char = {
+      case (char, offset) =>
+        val amount = char.toInt - LowerBound + direction(offset)
+        val cyclicShifted =
+          if (amount < 0) UpperBound + amount + 1
+          else if (amount > MaxOffset) LowerBound + amount - MaxOffset - 1
+          else LowerBound + amount
+        cyclicShifted.toChar
+    }
+
+    text zip keyOffsets map shiftChar mkString
   }
 }
 
@@ -29,10 +43,11 @@ object Cipher {
   }
 
   private val chars = 'a' to 'z'
-  val ZeroOffset = 'a'.toInt
-  val MaxShift = chars.length
-  val Left = false
-  val Right = true
+  val MaxOffset = chars.length - 1
+  val LowerBound = 'a'.toInt
+  val UpperBound = 'z'.toInt
+  val Left: Int => Int = (- _)
+  val Right: Int => Int = identity
 
   private def randomKey: Key = {
     val size = 100 + Random.nextInt(100)
