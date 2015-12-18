@@ -6,25 +6,28 @@ object Octal {
   def octalToInt(octal: Octal): Int = {
     def isOctalDigit(digit: Char): Boolean = "01234567" contains digit
 
-    @tailrec def loop(oct: Seq[Char], result: Int): Int = oct match {
-      case Nil => result
-      case h +: t => loop(t, result * 8 + h.asDigit)
-    }
-
     require(octal.nonEmpty && (octal forall isOctalDigit))
-    loop(octal, 0)
+
+    octal.foldLeft(0){
+      case (result, octalDigit) => result * 8 + octalDigit.asDigit
+    }
   }
 
-  def intToOctal(int: Int): Octal = {
-    @tailrec def loop(int: Int, result: Octal): Octal = {
-      val newInt = int / 8
-      val remainder = int % 8
-      val newResult = remainder.toString + result
+  def intToOctal(int: Int): Octal =
+    if (int == 0) "0"
+    else
+      unfoldLeft(int) { n =>
+        if (n == 0) None
+        else Some(n / 8, n % 8)
+      } mkString
 
-      if (newInt == 0) newResult
-      else loop(newInt, newResult)
+  private def unfoldLeft[A, B](seed: B)(f: B => Option[(B, A)]): Seq[A] = {
+    @tailrec
+    def loop(seed: B)(as: Seq[A]): Seq[A] = f(seed) match {
+      case Some((b, a)) => loop(b)(a +: as)
+      case None => as
     }
 
-    loop(int, "")
+    loop(seed)(Seq.empty[A])
   }
 }
