@@ -6,9 +6,10 @@ class Luhn(number: Number) {
     addends last
 
   lazy val addends: Digits = {
+    val digits = number.toString
     val digitsWithIndex =
-      number.toString.map(_.asDigit).reverse.zipWithIndex.reverse
-    digitsWithIndex map luhnTransform
+      digits.map(_.asDigit).zipWithIndex
+    digitsWithIndex map luhnTransform(digits.length - 1)
   }
 
   lazy val checksum: Checksum =
@@ -32,14 +33,14 @@ object Luhn {
 
   def apply(number: Number) = new Luhn(number)
 
-  private def luhnTransform(digit: Digit, index: Int): Digit = {
+  private def luhnTransform(maxIndex: Int)(digit: Digit, index: Int): Digit = {
     def odd(number: Int) = number % 2 != 0
     def luhnTransformedDigit: Digit = {
       val doubledDigit = digit * 2
       if (doubledDigit > 9) doubledDigit - 9 else doubledDigit
     }
 
-    if (odd(index)) luhnTransformedDigit else digit
+    if (odd(maxIndex - index)) luhnTransformedDigit else digit
   }
 
   implicit def function2AsTupled[A,B,C](f: (A,B) => C): ((A,B)) => C =
