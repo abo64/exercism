@@ -1,19 +1,18 @@
-import scala.annotation.tailrec
-
 object PascalsTriangle {
   type Row = Seq[Int]
   type PascalsTriangle = Seq[Row]
 
   def triangle(rows: Int): PascalsTriangle = {
-    @tailrec def loop(row: Int, result: PascalsTriangle): PascalsTriangle = {
-      if (row == 1) result
-      else loop(row - 1, result :+ nextRow(result last))
+    unfoldRight((rows, FirstRow)) { case (rowNumber, lastRow) =>
+      if (rowNumber == 0) None
+      else {
+        val newRow = nextRow(lastRow)
+        Some((lastRow, (rowNumber - 1, newRow)))
+      }
     }
-
-    loop(rows, FirstRow)
   }
 
-  private val FirstRow: PascalsTriangle = (Seq(Seq(1)))
+  private val FirstRow: Row = (Seq(1))
 
   private def nextRow(row: Row): Row = {
     def sumOfNeighbors(position: Int): Int = {
@@ -23,5 +22,11 @@ object PascalsTriangle {
     }
 
     (0 to row.size) map sumOfNeighbors
+  }
+
+  private[this] def unfoldRight[A,B](seed: B)(f: B => Option[(A,B)]): Seq[A] =
+    f(seed) match {
+    case None => Seq()
+    case Some((a,b)) => a +: unfoldRight(b)(f)
   }
 }
