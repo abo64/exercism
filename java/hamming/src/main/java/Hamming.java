@@ -1,4 +1,4 @@
-import java.util.function.IntPredicate;
+import java.util.function.IntBinaryOperator;
 import java.util.stream.IntStream;
 
 public class Hamming {
@@ -9,13 +9,20 @@ public class Hamming {
 
         IntStream nucleotidePositions = IntStream.range(0, strand1.length());
 
-        return (int)
+        return
             nucleotidePositions
-              .filter(differentNucleotides(strand1, strand2))
-              .count();
+              .reduce(0, incrementIfDifferentNucleotides(strand1, strand2));
+//              .filter(differentNucleotides(strand1, strand2))
+//              .count();
     }
 
-    private static IntPredicate differentNucleotides(String strand1, String strand2) {
-        return position -> strand1.charAt(position) != strand2.charAt(position);
+    private static IntBinaryOperator incrementIfDifferentNucleotides(String strand1, String strand2) {
+        return (accum, position) ->
+                   strand1.charAt(position) != strand2.charAt(position) ?
+                       accum + 1 : accum;
     }
+
+//    private static IntPredicate differentNucleotides(String strand1, String strand2) {
+//        return position -> strand1.charAt(position) != strand2.charAt(position);
+//    }
 }
