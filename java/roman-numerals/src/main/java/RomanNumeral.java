@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -15,8 +17,9 @@ public class RomanNumeral {
     }
 
     private static String toRoman(int arabicNumber) {
-        Stream<String> romanNumberParts = unfoldRight(arabicNumber, findNext);
-        Optional<String> romanNumeral = romanNumberParts.reduce(String::concat);
+        List<String> romanNumberParts = unfoldRight(arabicNumber, findNext);
+        Optional<String> romanNumeral =
+            romanNumberParts.stream().reduce(String::concat);
         return romanNumeral.orElse("");
     }
 
@@ -30,12 +33,24 @@ public class RomanNumeral {
                      new Pair<String,Integer>(found.second, arabicNumber - found.first));
         };
 
-    private static <A,B> Stream<A> unfoldRight(B seed, Function<B, Optional<Pair<A,B>>> f) {
-        Optional<Pair<A, B>> next = f.apply(seed);
-        return next
-                 .map(pair -> Stream.concat(Stream.of(pair.first), unfoldRight(pair.second, f)))
-                 .orElse(Stream.empty());
+    // more efficient and easier to understand than returning a Stream?!
+    private static <A, B> List<A> unfoldRight(B seed, Function<B, Optional<Pair<A, B>>> f) {
+        List<A> result = new ArrayList<>();
+        Optional<Pair<A, B>> maybeNext = f.apply(seed);
+        while (maybeNext.isPresent()) {
+            Pair<A, B> next = maybeNext.get();
+            result.add(next.first);
+            maybeNext = f.apply(next.second);
+        }
+        return result;
     }
+
+//    private static <A,B> Stream<A> unfoldRight(B seed, Function<B, Optional<Pair<A,B>>> f) {
+//        Optional<Pair<A, B>> next = f.apply(seed);
+//        return next
+//                 .map(pair -> Stream.concat(Stream.of(pair.first), unfoldRight(pair.second, f)))
+//                 .orElse(Stream.empty());
+//    }
 
     private static Stream<Pair<Integer,String>> arabicToRoman() {
         return Stream.of(
@@ -67,5 +82,4 @@ public class RomanNumeral {
             this.second = second;
         }
     }
-
 }
