@@ -1,38 +1,32 @@
-import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
+import java.util.Optional;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class Hexadecimal {
 
     public static int toDecimal(String hex) {
-        if (!isValidHex(hex)) return 0;
+        Stream<Character> hexDigits = characterStream(hex.toUpperCase());
 
-        List<Character> hexDigits =
-            characterStream(hex.toUpperCase()).collect(Collectors.toList());
-
-        return foldLeft(hexDigits, Integer.valueOf(0), hexToDecimal);
+        return hexDigits
+                 .map(hexToDecDigit)
+                 .reduce(Zero, accumulateDecimal)
+                 .orElse(0);
     }
 
-    private static final BiFunction<Integer, Character, Integer> hexToDecimal =
-        (decimal, hexDigit) -> decimal * 16 + Character.getNumericValue(hexDigit);
+    // some kind of Scala's for-comprehension of Haskell's monadic do would be nice here
+    private static final BinaryOperator<Optional<Integer>> accumulateDecimal =
+        (maybeDecimal, maybeDecDigit) ->
+            maybeDecimal.flatMap(decimal ->
+                maybeDecDigit.map(decDigit ->
+                    decimal * 16 + decDigit));
 
-    private static boolean isValidHex(String hex) {
-        Predicate<Character> isHexDigit =
-            c -> "0123456789ABCDEF".indexOf(c) > -1;
+    private static final Optional<Integer> Zero = Optional.of(0);
 
-        return (!hex.isEmpty()) &&
-                characterStream(hex.toUpperCase()).allMatch(isHexDigit);
-    }
+    private static final String HexDigits = "0123456789ABCDEF";
 
-    private static <A, B> B foldLeft(Iterable<A> as, B z, BiFunction<B,A,B> f) {
-        B result = z;
-        for (A a : as) {
-            result = f.apply(result, a);
-        }
-        return result;
-    }
+    private static final Function<Character,Optional<Integer>> hexToDecDigit =
+        c -> Optional.of(HexDigits.indexOf(c)).filter(i -> i >= 0);
 
     private static Stream<Character> characterStream(CharSequence str) {
         return str.chars().mapToObj(i -> (char)i);
