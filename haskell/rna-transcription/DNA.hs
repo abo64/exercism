@@ -6,5 +6,7 @@ toRnaNucleotide :: Map.Map Char Char
 toRnaNucleotide = Map.fromList [ ('G','C'), ('C','G'), ('T','A'), ('A','U') ]
 
 toRNA :: String -> String
-toRNA = map (\x ->
-  Map.findWithDefault (error $ show x ++ " is not a nucleotide.") x toRnaNucleotide )
+toRNA = map findNucleotide
+  where
+    findNucleotide = flip find toRnaNucleotide
+    find = Map.findWithDefault (error "not a nucleotide")
