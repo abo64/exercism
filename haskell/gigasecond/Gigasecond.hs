@@ -1,7 +1,7 @@
 module Gigasecond (fromDay) where
 
-  import Data.Time.Clock (UTCTime, addUTCTime)
+import Data.Time.Clock (UTCTime, addUTCTime)
 
-  fromDay :: UTCTime -> UTCTime
-  fromDay = addUTCTime gigasecond
-    where gigasecond = 10 ^ 9
+fromDay :: UTCTime -> UTCTime
+fromDay = addUTCTime gigasecond
+  where gigasecond = 1e9
