@@ -1,26 +1,23 @@
 module ETL (transform) where
 
-import Data.Map (Map, empty, foldrWithKey, union, fromList)
-import Data.Char (toLower)
+import qualified Data.Map as M
+import Data.Char as Char (toLower)
 
-type Letter = String
 type Point = Int
-type Letters = [Letter]
-type NewScore = (Letter,Point)
-type OldScoreFormat = Map Point Letters
-type NewScoreFormat = Map Letter Point
+type UpperCaseLetter = String
+type LowerCaseLetter = String
+type NewScore = (LowerCaseLetter, Point)
+type OldScoreFormat = M.Map Point [UpperCaseLetter]
+type NewScoreFormat = M.Map LowerCaseLetter Point
 
 transform :: OldScoreFormat -> NewScoreFormat
-transform =
-  foldrWithKey f empty
+transform = M.fromList . newScores
   where
-    f :: Point -> Letters -> NewScoreFormat -> NewScoreFormat
-    f point letters = union $ oldScoreToNewScoreFormat point letters
-
-    oldScoreToNewScoreFormat :: Point -> Letters -> NewScoreFormat
-    oldScoreToNewScoreFormat point letters =
-      fromList (map (toNewScore point) letters)
-
-    toNewScore :: Point -> Letter -> NewScore
-    toNewScore point letter =
-      (map toLower letter, point)
+    newScores :: OldScoreFormat -> [NewScore]
+    newScores oldScoreFormat = do
+      (point, upperCaseLetters) <- M.toList oldScoreFormat
+      lowerCaseLetter <- map toLowerCase upperCaseLetters
+      return (lowerCaseLetter, point)
+  
+    toLowerCase :: String -> String
+    toLowerCase = map Char.toLower
