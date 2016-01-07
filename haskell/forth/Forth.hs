@@ -9,7 +9,7 @@ module Forth
 
 import Data.Text (Text, split, pack, unpack, toUpper)
 import Data.Maybe (isJust, fromJust)
-import Data.Char (isAlphaNum, isSymbol)
+import Data.Char (isSpace, isPrint)
 
 type ParsedInput = [String]
 type ForthResult = Either ForthError ForthState
@@ -61,11 +61,7 @@ evalForth (":":wordName:xs) forthResult =
       else Right (upperCaseWordName, wordDef)
 
     upperCaseWordName = toUpperCase wordName
-    (wordDef, parsedInputRest) = getWordDef [] xs
-
-    getWordDef :: [String] -> ParsedInput -> (WordDefinition, ParsedInput)
-    getWordDef wd (";":ys) = (reverse wd, ys)
-    getWordDef wd (y:ys) = getWordDef (y:wd) ys
+    (wordDef, _:parsedInputRest) = break (== ";") xs
 evalForth (x:xs) s = evalForth nextParsedInput nextForthResult
   where
     nextForthResult
@@ -138,7 +134,7 @@ parseInput :: Text -> ParsedInput
 parseInput = map unpack . split notWordChar
   where
 -- did not want to dive into regex matching, so I tried to keep it simple
-    notWordChar c = not (isAlphaNum c || isSymbol c || c `elem` "+-/*:;")
+    notWordChar x = not (isPrint x) || isSpace x
 
 -- | Return the current stack as Text with the element
 -- on top of the stack being the rightmost element in the output
