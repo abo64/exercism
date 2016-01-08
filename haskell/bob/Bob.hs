@@ -6,11 +6,17 @@ import Text.Regex.Posix
 
 responseFor :: String -> String
 responseFor text
-  | isShouting = "Whoa, chill out!"
-  | matches "^.+\\?$" = "Sure."
-  | trim == "" = "Fine. Be that way!"
+  | isShouting text = "Whoa, chill out!"
+  | isQuestion text = "Sure."
+  | isSilence text = "Fine. Be that way!"
   | otherwise = "Whatever."
-    where
-      matches pattern = text =~ pattern :: Bool
-      trim = (T.unpack . T.strip . T.pack) text
-      isShouting = any isLetter text && not (any isLower text)
+  where
+    isQuestion = matches "^.+\\?$"
+    isSilence = null . trim
+    isShouting = allLetters .&&. noLowerCase
+
+    matches pattern text = text =~ pattern :: Bool
+    trim = T.unpack . T.strip . T.pack
+    allLetters = any isLetter
+    noLowerCase = not . any isLower
+    (.&&.) f g a = f a && g a
