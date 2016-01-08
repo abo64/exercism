@@ -13,10 +13,10 @@ responseFor text
   where
     isQuestion = matches "^.+\\?$"
     isSilence = null . trim
-    isShouting = allLetters .&&. noLowerCase
+    isShouting = someLetter .&&. noLowerCase
 
-    matches pattern text = text =~ pattern :: Bool
+    matches p = (=~ p)
     trim = T.unpack . T.strip . T.pack
-    allLetters = any isLetter
+    someLetter = any isLetter
     noLowerCase = not . any isLower
     (.&&.) f g a = f a && g a
