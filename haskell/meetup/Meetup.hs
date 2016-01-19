@@ -7,7 +7,7 @@ type Year = Integer
 type Month = Int
 
 data Weekday = Sunday | Monday | Tuesday | Wednesday | Thursday | Friday | Saturday
-  deriving (Eq)
+  deriving (Eq, Enum, Show)
 
 data Schedule = Teenth | First | Second | Third | Fourth | Last
 
@@ -31,12 +31,10 @@ findWeekday step weekday day =
   if found then candidate
   else findWeekday step weekday candidate
     where
+      found = candidateWeekday == weekday
+      candidateWeekday = toEnum wd :: Weekday
       candidate = addDays step day
       (_, wd) = sundayStartWeek candidate
-      candidatesWeekday = case wd of
-        0 -> Sunday; 1 -> Monday; 2 -> Tuesday; 3 -> Wednesday
-        4 -> Thursday; 5 -> Friday; 6 -> Saturday; _ -> undefined
-      found = candidatesWeekday == weekday
 
 previousDay :: Day -> Day
 previousDay = addDays (-1)
