@@ -28,5 +28,4 @@ scoreLetter letter
     tenPoints = ['Q', 'Z']
 
 scoreWord :: Word -> Score
-scoreWord word =
-  sum $ map scoreLetter word
+scoreWord = sum . map scoreLetter
