@@ -3,12 +3,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 
 public class Etl {
 
     public Map<String, Integer> transform(Map<Integer, List<String>> oldScores) {
-        return foldLeft(oldScores.entrySet(), new HashMap<>(), oldScoreToNewScores);
+        return oldScores.entrySet().stream()
+                 .reduce(new HashMap<String, Integer>(), oldScoreToNewScores, putAll);
     }
+
+    private static final BinaryOperator<Map<String, Integer>> putAll =
+        (accMap, map) -> {
+            accMap.putAll(map);
+            return accMap;
+        };
 
     private static final BiFunction<Map<String, Integer>, Entry<Integer, List<String>>,
             Map<String, Integer>> oldScoreToNewScores =
@@ -16,15 +24,9 @@ public class Etl {
             Integer point = oldScore.getKey();
             List<String> letters = oldScore.getValue();
             // sorry for the side effect - Java 8 FP requires compromises! ;-)
-            letters.stream().forEach(l -> newScores.put(l.toLowerCase(), point));
+            letters.stream()
+              .map(String::toLowerCase)
+              .forEach(l -> newScores.put(l, point));
             return newScores;
         };
-
-    private static <A, B> B foldLeft(Iterable<A> as, B z, BiFunction<B, A, B> f) {
-        B result = z;
-        for (A a : as) {
-            result = f.apply(result, a);
-        }
-        return result;
-    }
 }
