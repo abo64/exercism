@@ -14,10 +14,8 @@ type Annotation = Char
 
 annotate :: Board -> AnnotatedBoard
 annotate board =
-  annotatedSquares
+  map (map (annotateSquare board)) squares
   where
-    annotatedSquares :: [[Annotation]]
-    annotatedSquares = map (map (annotateSquare board)) squares
     squares = toSquares board
 
 toSquares :: Board -> [[Square]]
