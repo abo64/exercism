@@ -5,4 +5,5 @@ isLeapYear year =
   yearDivisibleBy 4 &&
      (not . yearDivisibleBy) 100 || yearDivisibleBy 400
   where
-    yearDivisibleBy = (== 0) . mod year
+    yearDivisibleBy = isDivisibleBy year
+    isDivisibleBy = curry $ (== 0) . uncurry rem
