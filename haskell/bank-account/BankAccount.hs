@@ -6,21 +6,17 @@ type Account = Maybe Integer
 type BankAccount = IORef Account
 
 openAccount :: IO BankAccount
-openAccount =
-  newIORef (Just 0 :: Account)
+openAccount = newIORef $ Just 0
 
 closeAccount :: BankAccount -> IO ()
-closeAccount bankAccount =
-  atomicWriteIORef bankAccount Nothing
+closeAccount = flip atomicWriteIORef Nothing
 
 getBalance :: BankAccount -> IO Account
 getBalance = readIORef
 
 incrementBalance :: BankAccount -> Integer -> IO Account
 incrementBalance bankAccount amount =
-  atomicModifyIORef bankAccount (pair . incrAccount)
+  atomicModifyIORef bankAccount incrAccount
   where
-    incrAccount :: Account -> Account
-    incrAccount = fmap (+ amount)
-
+    incrAccount = pair . fmap (+ amount)
     pair x = (x,x)
