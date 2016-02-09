@@ -17,5 +17,4 @@ cabal-version:       >=1.8
 library
   -- exposed-modules:     
   -- other-modules:       
-  build-depends:       base ==4.6.*, containers ==0.5.0.0, HUnit ==1.2.5.2
-  other-modules:       School
+  build-depends:       base ==4.6.*
