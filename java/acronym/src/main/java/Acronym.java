@@ -16,19 +16,10 @@ public class Acronym {
         return mkString(acronymLetters);
     }
 
-    private static final String WordSplitRegex = "[ -]";
-    // see http://stackoverflow.com/questions/7593969/regex-to-split-camelcase-or-titlecase-advanced
-    private static final String CamelCaseSplitRegex =
-        "(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])";
+    private static final String WordSplitRegex = "(\\W+|\\p{Lower}(?=\\p{Upper}))";
 
     private static Stream<String> splitWords(String phrase) {
-        return splitBy(phrase, WordSplitRegex)
-                 .flatMap(word -> splitBy(word, CamelCaseSplitRegex));
-    }
-
-    private static Stream<String> splitBy(String str, String regex) {
-        String[] words = str.split(regex);
-        return Arrays.stream(words);
+        return Arrays.stream(phrase.split(WordSplitRegex));
     }
 
     private static final Function<String, Character> firstChar =
