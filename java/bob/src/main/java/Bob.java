@@ -1,4 +1,5 @@
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -6,29 +7,42 @@ import java.util.stream.Stream;
 public class Bob {
 
     public String hey(String phrase) {
-        return Stream.of(question(phrase), silence(phrase), shouting(phrase))
+        return phraseClassifiers()
+                 .map(classifier -> classifier.classify(phrase))
                  .filter(response -> response.isPresent())
                  .map(response -> response.get())
                  .findFirst()
                  .orElse("Whatever.");
     }
 
-    private static Optional<String> question(String phrase) {
-        return Optional.of(phrase).filter(asPredicate("^.+\\?$"))
+    private interface PhraseClassifier extends Function<String, Optional<String>> {
+        default Optional<String> classify(String phrase) {
+            return apply(phrase);
+        }
+    }
+
+    private static Stream<PhraseClassifier> phraseClassifiers() {
+        return Stream.of(question, silence, shouting);
+    }
+
+    private static PhraseClassifier question =
+        phrase ->
+            Optional.of(phrase).filter(asPredicate("^.+\\?$"))
                  .filter(exists(Character::isLowerCase).or(exists(Character::isDigit)))
                  .map(ignore -> "Sure.");
-    }
 
-    private static Optional<String> silence(String phrase) {
-        return response("^\\s*$", phrase, "Fine. Be that way!");
-    }
 
-    private static Optional<String> shouting(String phrase) {
-        return Optional.of(phrase)
+    private static PhraseClassifier silence =
+        phrase ->
+            response("^\\s*$", phrase, "Fine. Be that way!");
+
+    private static PhraseClassifier shouting =
+        phrase ->
+            Optional.of(phrase)
                  .filter(forall(c -> !Character.isLowerCase(c)))
                  .filter(exists(Character::isLetter))
                  .map(ignore -> "Whoa, chill out!");
-    }
+
 
     private static Predicate<String> forall(Predicate<Character> p) {
         return str -> characterStream(str).allMatch(p);
