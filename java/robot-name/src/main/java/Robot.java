@@ -1,6 +1,7 @@
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -15,7 +16,7 @@ public class Robot {
 
     private static String randomName() {
         return randomNames()
-                .filter(Robot::isUnusedName)
+                .filter(isUnusedName)
                 .findFirst()
                 .get();
     }
@@ -49,10 +50,11 @@ public class Robot {
     }
 
     private static Set<String> usedNames = new HashSet<>();
-    private static boolean isUnusedName(String candidate) {
-        if (usedNames.contains(candidate)) return false;
+    private static Predicate<String> isUnusedName =
+        candidate -> {
+          if (usedNames.contains(candidate)) return false;
 
-        usedNames.add(candidate);
-        return true;
-	}
+          usedNames.add(candidate);
+          return true;
+        };
 }
