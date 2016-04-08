@@ -16,25 +16,23 @@ public class Robot {
     private static String randomName() {
         return randomNames()
                 .filter(Robot::isUnusedName)
-                .findFirst().get();
+                .findFirst()
+                .get();
     }
 
     private static final Supplier<String> RandomNameSupplier =
-        new Supplier<String>() {
-            @Override public String get() {
-                return twoRandomUpperLetters() + threeRandomIntegers();
-            }};
+        () -> randomUpperLetters(2) + randomIntegers(3);
 
     private static Stream<String> randomNames() {
         return Stream.generate(RandomNameSupplier);
     }
 
-    private static String twoRandomUpperLetters() {
-        return randomChars(2, 'A', 'Z');
+    private static String randomUpperLetters(int howMany) {
+        return randomChars(howMany, 'A', 'Z');
     }
 
-    private static String threeRandomIntegers() {
-        return randomChars(3, '0', '9');
+    private static String randomIntegers(int howMany) {
+        return randomChars(howMany, '0', '9');
     }
 
     private static String randomChars(int howMany, char lowerBound, char upperBound) {
