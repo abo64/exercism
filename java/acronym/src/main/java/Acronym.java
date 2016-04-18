@@ -1,5 +1,5 @@
-import java.util.Arrays;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -8,19 +8,15 @@ public class Acronym {
     private Acronym() {}
 
     public static String generate(String phrase) {
-        Stream<String> words = splitWords(phrase);
         Stream<Character> acronymLetters =
-            words
+            SplitWords.splitAsStream(phrase)
               .map(firstChar)
               .map(Character::toUpperCase);
         return mkString(acronymLetters);
     }
 
-    private static final String WordSplitRegex = "(\\W+|\\p{Lower}(?=\\p{Upper}))";
-
-    private static Stream<String> splitWords(String phrase) {
-        return Arrays.stream(phrase.split(WordSplitRegex));
-    }
+    private static final Pattern SplitWords =
+            Pattern.compile("(\\W+|\\p{Lower}(?=\\p{Upper}))");
 
     private static final Function<String, Character> firstChar =
         s -> s.charAt(0);
