@@ -24,7 +24,7 @@ public class School {
     }
 
     public List<String> grade(Integer grade) {
-        return DB.getOrDefault(grade, NoStudents);
+        return Collections.unmodifiableList(DB.getOrDefault(grade, NoStudents));
     }
 
     public Map<Integer, List<String>> sort() {
