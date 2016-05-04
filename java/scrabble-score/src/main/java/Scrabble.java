@@ -1,5 +1,7 @@
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -16,12 +18,19 @@ public class Scrabble {
     private static final Function<Character,Integer> charScore =
         createCharScore().compose(Character::toUpperCase);
 
+    private static final BiFunction<Integer,Character,Integer> addScore =
+        (acc, c) -> acc + charScore.apply(c);
+
+    private static final BinaryOperator<Integer> add =
+        (i, j) -> i + j;
+
     public int getScore() {
         return word.map(toScore).orElse(0);
     }
 
     private Function<String,Integer> toScore =
-        word -> characterStream(word).map(charScore).mapToInt(i -> i.intValue()).sum();
+        word -> characterStream(word).reduce(0, addScore, add);
+//        word -> characterStream(word).map(charScore).mapToInt(i -> i.intValue()).sum();
 
     private static Function<Character,Integer> createCharScore() {
         Stream<Pair<Character, Integer>> charScores =
