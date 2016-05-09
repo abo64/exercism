@@ -1,16 +1,17 @@
 module Roman (numerals) where
 
 import qualified Data.Map.Strict as Map
+import Data.List (unfoldr)
+import Data.Functor ((<$>))
+import Data.Bifunctor (first)
+import Data.Tuple (swap)
 
 type Numerals = String
 
 numerals :: Int -> Numerals
-numerals 0 = ""
-numerals int =
-  (numeral ++) $ numerals newInt
+numerals = concat . unfoldr go
   where
-    Just (value, numeral) = Map.lookupLE int numeralConversions
-    newInt = int - value
+    go n = swap . first (n-) <$> Map.lookupLE n numeralConversions
 
 numeralConversions :: Map.Map Int Numerals
 numeralConversions = Map.fromList
