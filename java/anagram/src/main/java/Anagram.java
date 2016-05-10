@@ -20,12 +20,11 @@ public class Anagram {
     }
 
     private Predicate<String> sameCharsButNotIdentical =
-        new Predicate<String>() {
-            @Override public boolean test(String candidate) {
-                String lowerCaseCandidate = candidate.toLowerCase();
-                return sortedLowerCaseWord.equals(sortedCharsStr(lowerCaseCandidate)) &&
-                       !lowerCaseWord.equals(lowerCaseCandidate);
-            }};
+        candidate -> {
+            String lowerCaseCandidate = candidate.toLowerCase();
+            return this.sortedLowerCaseWord.equals(sortedCharsStr(lowerCaseCandidate))
+                    && !this.lowerCaseWord.equals(lowerCaseCandidate);
+        };
 
     private static String sortedCharsStr(String str) {
         Stream<Character> sortedChars =
