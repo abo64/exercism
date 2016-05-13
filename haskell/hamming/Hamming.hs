@@ -1,7 +1,9 @@
 module Hamming (distance) where
 
+import Data.Composition ( (.:) )
+
 distance :: String -> String -> Int
 distance =
-  (sum .) . zipWith nucleotideDistance
+  sum .: zipWith nucleotideDistance
   where
-    nucleotideDistance = (fromEnum .) . (/=)
+    nucleotideDistance = fromEnum .: (/=)
