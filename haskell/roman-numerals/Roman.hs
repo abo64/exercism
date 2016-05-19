@@ -3,7 +3,6 @@ module Roman (numerals) where
 import qualified Data.Map.Strict as Map
 import Data.List (unfoldr)
 import Data.Functor ((<$>))
-import Data.Bifunctor (first)
 import Data.Tuple (swap)
 
 type Numerals = String
@@ -11,7 +10,7 @@ type Numerals = String
 numerals :: Int -> Numerals
 numerals = concat . unfoldr go
   where
-    go n = swap . first (n-) <$> Map.lookupLE n numeralConversions
+    go n = fmap (n-) . swap <$> Map.lookupLE n numeralConversions
 
 numeralConversions :: Map.Map Int Numerals
 numeralConversions = Map.fromList
