@@ -41,13 +41,13 @@ makeLenses ''Person
 makeLenses ''Gregorian
 
 bornStreet :: Born -> String
-bornStreet = view $ bornAt . street
+bornStreet = (^.bornAt .street)
 
 setCurrentStreet :: String -> Person -> Person
-setCurrentStreet = set $ address . street
+setCurrentStreet = (address.street.~)
 
 setBirthMonth :: Int -> Person -> Person
-setBirthMonth = set $ born . bornOn . isoDayGregorian . month
+setBirthMonth = (born.bornOn.isoDayGregorian.month.~)
 
 isoDayGregorian :: Iso' Day Gregorian
 isoDayGregorian = iso dayToGregorian gregorianToDay
