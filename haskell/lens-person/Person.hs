@@ -3,7 +3,6 @@ module Person where
 
 import Data.Time.Calendar
 import Control.Lens
-import Control.Monad.State
 
 data Person = Person {
       _name    :: Name,
@@ -54,16 +53,11 @@ isoDayGregorian :: Iso' Day Gregorian
 isoDayGregorian = iso dayToGregorian gregorianToDay
   where
     dayToGregorian :: Day -> Gregorian
-    dayToGregorian dd = Gregorian y m d
-      where (y,m,d) = toGregorian dd
+    dayToGregorian = (\(y,m,d) -> Gregorian y m d) . toGregorian
     gregorianToDay :: Gregorian -> Day
     gregorianToDay (Gregorian y m d) = fromGregorian y m d
 
 -- | Transform both birth and current street names.
 renameStreets :: (String -> String) -> Person -> Person
-renameStreets f p = runIdentity $ execStateT renameStreetsState p
-  where
-    renameStreetsState :: StateT Person Identity ()
-    renameStreetsState = do
-      born . bornAt . street %= f
-      address . street %= f
+renameStreets f = (born.bornAt.street %~ f) . (address.street %~ f)
+
