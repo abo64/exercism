@@ -2,7 +2,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -22,12 +21,9 @@ public class DNA {
 
     public Map<Character,Integer> nucleotideCounts() {
         Map<Character, Integer> nucleotideCounts = nucleotideStream()
-                 .collect(Collectors.groupingBy(Function.identity(), intCounting));
+                 .collect(Collectors.groupingBy(Function.identity(), Collectors.summingInt(e -> 1)));
         return withZeroCounts(nucleotideCounts);
     }
-
-    private Collector<Character, ?, Integer> intCounting =
-        Collectors.reducing(0, e -> 1, (a,b) -> a + b);
 
     private Map<Character, Integer> withZeroCounts(Map<Character, Integer> nucleotideCounts) {
         Map<Character,Integer> result = new HashMap<>(Nucleotides);
