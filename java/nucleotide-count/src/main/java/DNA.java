@@ -21,7 +21,7 @@ public class DNA {
 
     public Map<Character,Integer> nucleotideCounts() {
         Map<Character, Integer> nucleotideCounts = nucleotideStream()
-                 .collect(Collectors.groupingBy(Function.identity(), Collectors.summingInt(e -> 1)));
+                 .collect(Collectors.groupingBy(Function.identity(), Collectors.collectingAndThen(Collectors.counting(), Long::intValue)));;
         return withZeroCounts(nucleotideCounts);
     }
 

@@ -1,9 +1,9 @@
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.summingInt;
 
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class WordCount {
 
@@ -11,6 +11,7 @@ public class WordCount {
 
     public Map<String, Integer> phrase(String phrase) {
         return SplitWords.splitAsStream(phrase.toLowerCase())
-                .collect(groupingBy(identity(), summingInt(e -> 1)));
+                .collect(groupingBy(identity(),
+                         Collectors.collectingAndThen(Collectors.counting(), Long::intValue)));
     }
 }
