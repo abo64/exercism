@@ -5,18 +5,16 @@ object Series {
   type Slizes = Seq[Digits]
   type Product = Int
 
-  def digits(digitStr: DigitString): Digits =
+  private def digits(digitStr: DigitString): Digits =
     digitStr map (_.asDigit)
 
-  private val NoSlices: Slizes = Seq()
-
-  def slices(size: Int, digitStr: DigitString): Option[Slizes] = {
+  private def slices(size: Int, digitStr: DigitString): Option[Slizes] = {
     val digitsSliding: DigitString => Slizes =
       digits(_) sliding size toSeq
 
     Option(digitStr)
-      .filter (_.length >= size)
-      .map (digitsSliding)
+      .filter(_.length >= size)
+      .map(digitsSliding)
   }
 
   def largestProduct(size: Int, digitStr: DigitString): Option[Product] = {
