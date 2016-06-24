@@ -5,25 +5,27 @@ object Series {
   type Slizes = Seq[Digits]
   type Product = Int
 
-  def digits(digitStr: DigitString): Digits = {
+  def digits(digitStr: DigitString): Digits =
     digitStr map (_.asDigit)
-  }
 
   private val NoSlices: Slizes = Seq()
-  private val ProductZero: Product = 1
 
-  def slices(size: Int, digitStr: DigitString): Slizes = {
-    if (digitStr.length < size) NoSlices
-    else {
-      val digits = this.digits(digitStr)
-      digits sliding size toSeq
-    }
+  def slices(size: Int, digitStr: DigitString): Option[Slizes] = {
+    val digitsSliding: DigitString => Slizes =
+      digits(_) sliding size toSeq
+
+    Option(digitStr)
+      .filter (_.length >= size)
+      .map (digitsSliding)
   }
 
-  def largestProduct(size: Int, digitStr: DigitString): Product = {
-    val intSlices = slices(size, digitStr) map (_.product)
+  def largestProduct(size: Int, digitStr: DigitString): Option[Product] = {
+    def getLargestProduct(slices: Slizes): Product =
+      slices map (_.product) max
 
-    if (intSlices != NoSlices) intSlices max
-    else ProductZero
+    if (size == 0)
+      Some(1)
+    else
+      slices(size, digitStr) map getLargestProduct
   }
 }
