@@ -5,8 +5,5 @@ import qualified Data.Map as Map
 toRnaNucleotide :: Map.Map Char Char
 toRnaNucleotide = Map.fromList [ ('G','C'), ('C','G'), ('T','A'), ('A','U') ]
 
-toRNA :: String -> String
-toRNA = map findNucleotide
-  where
-    findNucleotide = flip find toRnaNucleotide
-    find = Map.findWithDefault (error "not a nucleotide")
+toRNA :: String -> Maybe String
+toRNA = mapM (`Map.lookup` toRnaNucleotide)
