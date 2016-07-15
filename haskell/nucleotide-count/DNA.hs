@@ -3,25 +3,33 @@ module DNA (count, nucleotideCounts) where
 import Data.List as L
 import Data.Map as M
 
-count :: Char -> String -> Int
-count nucleotide dna
-  | isNucleotide nucleotide && all isNucleotide dna = L.foldl accumulate 0 dna
+count :: Char -> String -> Either String Int
+count char dna =
+  toNucleotide char >> foldDNA countNucleotide 0 dna
   where
-    accumulate acc nucl =
-      if nucl == nucleotide then acc + 1 else acc
+    countNucleotide counter nucleotide =
+      counter + fromEnum (nucleotide == char)
 
-nucleotideCounts :: String -> Map Char Int
-nucleotideCounts dna
-  | all isNucleotide dna = M.mapWithKey countNucleotide zeroCounts
+nucleotideCounts :: String -> Either String (Map Char Int)
+nucleotideCounts = foldDNA countNucleotides zeroCounts
   where
-    countNucleotide nucleotide _ = count nucleotide dna
+    countNucleotides = flip $ M.adjust succ
     zeroCounts = M.fromList (L.map zeroCount nucleotides)
     zeroCount nucl = (nucl, 0)
 
-isNucleotide :: Char -> Bool
-isNucleotide char
-  | char `elem` nucleotides = True
-  | otherwise = error ("invalid nucleotide '" ++ [char] ++ "'")
+foldDNA :: (a -> Char -> a) -> a -> String -> Either String a
+foldDNA f zero = L.foldl accumulate (Right zero)
+  where
+    accumulate a char = do
+      acc <- a
+      nucleotide <- toNucleotide char
+      return $ f acc nucleotide
 
-nucleotides :: [Char]
-nucleotides = ['A', 'C', 'G', 'T']
+toNucleotide :: Char -> Either String Char
+toNucleotide char =
+  if char `elem` nucleotides
+    then Right char
+    else Left $ "invalid nucleotide '" ++ [char] ++ "'"
+
+nucleotides :: String
+nucleotides = "ACGT"
