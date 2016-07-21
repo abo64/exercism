@@ -4,6 +4,7 @@ import static java.lang.Math.sqrt;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -55,7 +56,12 @@ public class Crypto {
                 if (col >= row.length()) return cipher;
                 else return cipher.append(row.charAt(col));
             };
-        return foldLeft(plaintextSegments, new StringBuilder(), addRowChar);
+            return plaintextSegments.stream()
+                     .reduce(new StringBuilder(), addRowChar, first());
+    }
+
+    private static <T> BinaryOperator<T> first() {
+        return (_1, _2) -> _1;
     }
 
     private static <A> String mkString(Stream<A> as, CharSequence delimiter) {
@@ -70,13 +76,5 @@ public class Crypto {
 
     private static Stream<Character> characterStream(CharSequence str) {
         return str.chars().mapToObj(i -> (char)i);
-    }
-
-    private static <A, B> B foldLeft(Iterable<A> as, B z, BiFunction<B,A,B> f) {
-        B result = z;
-        for (A a : as) {
-            result = f.apply(result, a);
-        }
-        return result;
     }
 }
