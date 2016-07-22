@@ -4,11 +4,10 @@ import Data.List as L
 import Data.Map as M
 
 count :: Char -> String -> Either String Int
-count char dna =
-  toNucleotide char >> foldDNA countNucleotide 0 dna
-  where
-    countNucleotide counter nucleotide =
-      counter + fromEnum (nucleotide == char)
+count char dna = do
+  c <- toNucleotide char
+  counts <- nucleotideCounts dna
+  return $ counts ! c
 
 nucleotideCounts :: String -> Either String (Map Char Int)
 nucleotideCounts = foldDNA countNucleotides zeroCounts
