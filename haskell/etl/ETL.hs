@@ -4,8 +4,8 @@ import qualified Data.Map as M
 import Data.Char as Char (toLower)
 
 type Point = Int
-type UpperCaseLetter = String
-type LowerCaseLetter = String
+type UpperCaseLetter = Char
+type LowerCaseLetter = Char
 type NewScore = (LowerCaseLetter, Point)
 type OldScoreFormat = M.Map Point [UpperCaseLetter]
 type NewScoreFormat = M.Map LowerCaseLetter Point
@@ -16,8 +16,5 @@ transform = M.fromList . newScores
     newScores :: OldScoreFormat -> [NewScore]
     newScores oldScoreFormat = do
       (point, upperCaseLetters) <- M.toList oldScoreFormat
-      lowerCaseLetter <- map toLowerCase upperCaseLetters
+      lowerCaseLetter <- map toLower upperCaseLetters
       return (lowerCaseLetter, point)
-  
-    toLowerCase :: String -> String
-    toLowerCase = map Char.toLower
