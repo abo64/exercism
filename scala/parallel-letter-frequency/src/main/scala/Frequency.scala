@@ -9,8 +9,7 @@ object Frequency {
     implicit val executionContext =
       ExecutionContext.fromExecutor(Executors.newWorkStealingPool(threads))
 
-    val filteredText = text map filterLine
-    val frequencyFutures = filteredText map charFrequencyAsync
+    val frequencyFutures = text map charFrequencyAsync
     val futureFrequencies = Future.fold(frequencyFutures)(EmptyCharFrequency)(addFrequencies)
     Await.result(futureFrequencies, 5 seconds)
   }
@@ -23,7 +22,7 @@ object Frequency {
 
   private def charFrequency(line: String): CharFrequency = {
 //    println(s"${Thread.currentThread.getName} - processing line: $line")
-    line groupBy identity mapValues (_.size)
+    filterLine(line) groupBy identity mapValues (_.size)
   }
 
   private val EmptyCharFrequency = Map[Char,Int]()
