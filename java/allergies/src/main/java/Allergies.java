@@ -16,7 +16,7 @@ public class Allergies {
 
     public List<Allergen> getList() {
             return Arrays.stream(Allergen.values())
-                     .filter(a -> isAllergicTo(a))
+                     .filter(this::isAllergicTo)
                      .collect(Collectors.toList());
     }
 
