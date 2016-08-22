@@ -1,4 +1,4 @@
-module Series (digits, slices, largestProduct) where
+module Series (largestProduct) where
 
 import Data.Char (digitToInt)
 import Data.List (tails)
@@ -9,9 +9,6 @@ type Digits = [Int]
 type Slizes = [Digits]
 type Product = Int
 
-digits :: DigitString -> Digits
-digits = map digitToInt
-
 slices :: Size -> DigitString -> Slizes
 slices size digitString =
   filter ((== size) . length) allSlices
@@ -19,9 +16,9 @@ slices size digitString =
     allSlices = map (take size) $ tails digits
     digits = map digitToInt digitString
 
-largestProduct :: Size -> DigitString -> Product
+largestProduct :: Size -> DigitString -> Maybe Product
 largestProduct s d
-  | null theSlices = 1
-  | otherwise = maximum $ map product theSlices 
+  | null theSlices = Nothing
+  | otherwise = Just $ maximum $ map product theSlices
   where
     theSlices = slices s d
