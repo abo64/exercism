@@ -1,7 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.BinaryOperator;
+import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
@@ -16,25 +15,17 @@ public class Sieve {
     public List<Integer> getPrimes() {
         return IntStream.rangeClosed(2, n)
                 .boxed()
-                .reduce(new ArrayList<Integer>(), addIfPrime, first());
+                .collect(ArrayList::new, addIfPrime, ArrayList::addAll);
     }
 
-    private static <T> BinaryOperator<T> first() {
-        return (_1, _2) -> _1;
-    }
-
-    private static BiFunction<List<Integer>, Integer, List<Integer>> addIfPrime =
+    private static final BiConsumer<ArrayList<Integer>, Integer> addIfPrime =
         (primes, candidate) -> {
-            Predicate<Integer> squareLE = i -> i*i <= candidate;
+            Predicate<Integer> squareLE = i -> i * i <= candidate;
             Predicate<Integer> notDivisibleBy = i -> candidate % i > 0;
 
-            boolean candidateIsPrime =
-                primes.stream()
-                  .filter(squareLE)
-                  .allMatch(notDivisibleBy);
+            boolean candidateIsPrime = primes.stream().filter(squareLE).allMatch(notDivisibleBy);
 
-            if (candidateIsPrime) primes.add(candidate);
-
-            return primes;
-        };
+            if (candidateIsPrime)
+                primes.add(candidate);
+    };
 }
