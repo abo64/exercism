@@ -15,10 +15,10 @@ public class Sieve {
     public List<Integer> getPrimes() {
         return IntStream.rangeClosed(2, n)
                 .boxed()
-                .collect(ArrayList::new, addIfPrime, ArrayList::addAll);
+                .collect(ArrayList::new, addIfPrime, List::addAll);
     }
 
-    private static final BiConsumer<ArrayList<Integer>, Integer> addIfPrime =
+    private static final BiConsumer<List<Integer>, Integer> addIfPrime =
         (primes, candidate) -> {
             Predicate<Integer> squareLE = i -> i * i <= candidate;
             Predicate<Integer> notDivisibleBy = i -> candidate % i > 0;
