@@ -25,7 +25,7 @@ object Frequency {
     filterLine(line) groupBy identity mapValues (_.size)
   }
 
-  private val EmptyCharFrequency = Map[Char,Int]()
+  private val EmptyCharFrequency: CharFrequency = Map[Char,Int]()
 
   private val IgnoredChars = """\p{Punct}|\p{Digit}|\p{Space}"""
   private def filterLine(line: String): String =
