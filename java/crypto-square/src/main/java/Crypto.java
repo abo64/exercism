@@ -3,8 +3,7 @@ import static java.lang.Math.sqrt;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.BinaryOperator;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -51,17 +50,13 @@ public class Crypto {
     }
 
     private static StringBuilder foldSquareRows(List<String> plaintextSegments, int col) {
-        BiFunction<StringBuilder, String, StringBuilder> addRowChar =
+        BiConsumer<StringBuilder, String> addRowChar =
             (cipher, row) -> {
-                if (col >= row.length()) return cipher;
-                else return cipher.append(row.charAt(col));
+                if (col < row.length())
+                    cipher.append(row.charAt(col));
             };
             return plaintextSegments.stream()
-                     .reduce(new StringBuilder(), addRowChar, first());
-    }
-
-    private static <T> BinaryOperator<T> first() {
-        return (_1, _2) -> _1;
+                     .collect(StringBuilder::new, addRowChar, StringBuilder::append);
     }
 
     private static <A> String mkString(Stream<A> as, CharSequence delimiter) {
