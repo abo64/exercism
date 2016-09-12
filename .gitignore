@@ -21,3 +21,4 @@ dist/
 .worksheet/
 Worksheet.*
 .keep
+.stack-work/
