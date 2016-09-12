@@ -1,8 +1,6 @@
 module Base (rebase) where
 
 import Control.Monad (mfilter, foldM)
-import Data.List (unfoldr)
-import Data.Tuple (swap)
 
 rebase :: Integral a => a -> a -> [a] -> Maybe [a]
 rebase inputBase outputBase inputDigits = do
@@ -25,13 +23,16 @@ toDecimal base = foldM nextInt 0
 --  where
 --    validMult p = fmap (p*) . validDigit base
 --    powers = map (base^) [0,1..]
-----    powers = unfoldr (\b -> Just (base^b, succ b)) 0
 
 fromDecimal :: Integral a => a -> a -> [a]
-fromDecimal base = reverse . unfoldr nextDigit
+fromDecimal base = unfoldl nextDigit
   where
-    nextDigit =
-      fmap (swap . (`quotRem` base)) . mfilter (> 0) . Just
+    nextDigit = fmap (`quotRem` base) . mfilter (> 0) . Just
 --    nextDigit dec =
---      | dec > 0 = Just (swap $ quotRem dec base)
+--      | dec > 0 = Just (quotRem dec base)
 --      | otherwise = Nothing
+
+unfoldl :: (b -> Maybe (b, a)) -> b -> [a]
+unfoldl f seed = loop seed []
+  where
+    loop b as = maybe as (\(b,a) -> loop b (a:as)) (f b)
