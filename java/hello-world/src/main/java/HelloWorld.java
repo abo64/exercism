@@ -13,5 +13,5 @@ public class HelloWorld {
     }
 
     private static final Predicate<String> isBlank =
-        str -> str.trim().equals("");
+        str -> str.trim().isEmpty();
 }
