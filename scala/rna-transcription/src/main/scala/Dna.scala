@@ -1,16 +1,20 @@
 import Dna._
 
-class Dna {
-  def toRna(dna: Strand): Strand =
-    dna map toRnaNucleotide
-}
-
 object Dna {
-  def apply() = new Dna
+  private type Strand = String
+  private type Nucleotide = Char
 
-  type Strand = String
-  type Nucleotide = Char
+  def toRna(dna: Strand): Option[Strand] =
+    dna.foldRight (Option("")) { case (char, rna) =>
+      for {
+        rnaNucleotide <- toRnaNucleotide(char)
+        rnaStrand <- rna
+      } yield rnaNucleotide +: rnaStrand
+  }
 
-  val toRnaNucleotide: Map[Nucleotide,Nucleotide] =
+  private val DnaToRna =
     Map('G' -> 'C', 'C' -> 'G', 'T' -> 'A', 'A' -> 'U')
+
+  private def toRnaNucleotide(char: Char): Option[Nucleotide] =
+     DnaToRna get char
 }
