@@ -1,7 +1,8 @@
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -21,12 +22,13 @@ public class Scrabble {
     }
 
     private Function<String,Integer> toScore =
-        word -> characterStream(word).collect(Collectors.summingInt(c -> charScore.apply(c)));
-//        word -> characterStream(word).reduce(0, addScore, (i, j) -> i + j);
-//        word -> characterStream(word).map(charScore).mapToInt(i -> i.intValue()).sum();
+        word -> characterStream(word)
+                  .map(charScore)
+                  .mapToInt(Integer::intValue)
+                  .sum();
 
     private static Function<Character,Integer> createCharScore() {
-        Stream<Pair<Character, Integer>> charScores =
+        Stream<Entry<Character, Integer>> charScores =
           concatStreams(
             charScoreStream("AEIOULNRST", 1),
             charScoreStream("DG", 2),
@@ -35,7 +37,8 @@ public class Scrabble {
             charScoreStream("K", 5),
             charScoreStream("JX", 8),
             charScoreStream("QZ", 10));
-        Map<Character, Integer> charScoreMap = charScores.collect(pairsToMap());
+        Map<Character, Integer> charScoreMap =
+            charScores.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
         return mapToFunction(charScoreMap, Optional.of(0));
     }
 
@@ -49,29 +52,12 @@ public class Scrabble {
         return Stream.of(streams).reduce(Stream::concat).get();
     }
 
-    private static Stream<Pair<Character, Integer>> charScoreStream(String chars, Integer score) {
+    private static Stream<Entry<Character, Integer>> charScoreStream(String chars, Integer score) {
         return characterStream(chars)
-                 .map(c -> new Pair<Character, Integer>(c, score));
+                 .map(c -> new SimpleEntry<Character, Integer>(c, score));
     }
 
     private static Stream<Character> characterStream(String str) {
         return str.chars().mapToObj(i -> (char)i);
-    }
-
-    private static final <K,V> Collector<Pair<K,V>, ?, Map<K,V>> pairsToMap() {
-        return Collectors.toMap(Pair::getFirst, Pair::getSecond);
-    }
-
-    private static class Pair<F,S> {
-        private F first;
-        private S second;
-
-        private Pair(F first, S second) {
-            this.first = first;
-            this.second = second;
-        }
-
-        public F getFirst() { return first; }
-        public S getSecond() { return second; }
     }
 }
