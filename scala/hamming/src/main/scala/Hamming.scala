@@ -1,21 +1,17 @@
+import scala.annotation.tailrec
+
 object Hamming {
-  type Nucleotide = Char
-  type Strand = Seq[Nucleotide]
-  type NucleotidePair = (Nucleotide, Nucleotide)
+  def compute[T](xs: Seq[T], ys: Seq[T]): Option[Int] = {
+    def difference(x: T, y: T): Int = if (x != y) 1 else 0
 
-  private val differentNucleotides: NucleotidePair => Boolean =
-    different[Nucleotide]
+    @tailrec
+    def loop(xs: Seq[T], ys: Seq[T], acc: Int): Option[Int] =
+      (xs, ys) match {
+        case (Nil, Nil) => Some(acc)
+        case (a+:as, b+:bs) => loop(as, bs, acc + difference(a, b))
+        case _ => None
+      }
 
-  def compute(strand1: Strand, strand2: Strand): Int = {
-    require(strand1.length == strand2.length, "strands of unequal length")
-
-    val nucleotidePairs: Seq[NucleotidePair] = strand1 zip strand2
-    nucleotidePairs count differentNucleotides
+    loop(xs, ys, 0)
   }
-
-  private  def different[T](t1: T, t2: T) =
-    t1 != t2
-
-  private implicit def function2AsTupled[A,B,C](f: (A,B) => C): ((A,B)) => C =
-    f.tupled
 }
