@@ -1,57 +1,63 @@
 import org.scalatest._
 
 class NucleotideCountSpecs extends FlatSpec with Matchers {
-  "empty dna string" should "have no adenine" in {
-    new DNA("").nucleotideCounts('A') should be (0)
+  behavior of "count"
+
+  it should "have no adenine for an empty dna string" in {
+    new DNA("").count('A') should be (Right(0))
   }
 
+  it should "count cytosine for a repetitive sequence" in {
+    new DNA("CCCCC").count('C') should be (Right(5))
+  }
+
+  it should "count only thymine for a mixed dna string" in {
+    new DNA("GGGGGTAACCCGG").count('T') should be (Right(1))
+  }
+
+  it should "validate nucleotides" in {
+    new DNA("GACT").count('X') should be (Left("invalid nucleotide 'X'"))
+  }
+
+  it should "validate dna" in {
+    new DNA("GACYT").count('G') should be (Left("invalid nucleotide 'Y'"))
+  }
+
+  behavior of "nucleotideCounts"
+
   it should "have no nucleotides" in {
-    val expected = Map('A' -> 0, 'T' -> 0, 'C' -> 0, 'G' -> 0)
+    val expected = Right(Map('A' -> 0, 'T' -> 0, 'C' -> 0, 'G' -> 0))
     new DNA("").nucleotideCounts should be (expected)
   }
 
-  "a repetitive sequence" should "count cytosine" in {
-    new DNA("CCCCC").nucleotideCounts('C') should be (5)
-  }
-
   it should "have only guanine" in {
-    val expected = Map('A' -> 0, 'T' -> 0, 'C' -> 0, 'G' -> 8)
+    val expected = Right(Map('A' -> 0, 'T' -> 0, 'C' -> 0, 'G' -> 8))
     new DNA("GGGGGGGG").nucleotideCounts should be (expected)
-  }
-
-  "a mixed dna string" should "count only thymine" in {
-    new DNA("GGGGGTAACCCGG").nucleotideCounts('T') should be (1)
   }
 
   it should "count a nucleotide only once" in {
     val dna = new DNA("CGATTGGG")
-    dna.nucleotideCounts('T')
-    dna.nucleotideCounts('T') should be (2)
+    val counts = dna.nucleotideCounts.right.get
+    counts('T')
+    counts('T') should be (2)
   }
 
   it should "not change counts after counting adenine" in {
     val dna = new DNA("GATTACA")
-    dna.nucleotideCounts('A')
-    val expected = Map('A' -> 3, 'T' -> 2, 'C' -> 1, 'G' -> 1)
+    val counts = dna.nucleotideCounts.right.get
+    counts('A')
+    val expected = Right(Map('A' -> 3, 'T' -> 2, 'C' -> 1, 'G' -> 1))
     dna.nucleotideCounts should be (expected)
-  }
-
-  it should "validate nucleotides" in {
-    a [RuntimeException] should be thrownBy new DNA("GACT").nucleotideCounts('X')
-  }
-
-  it should "validate dna not rna" in {
-    a [RuntimeException] should be thrownBy new DNA("ACGU")
-  }
-
-  it should "validate dna" in {
-    a [RuntimeException] should be thrownBy new DNA("John")
   }
 
   it should "count all nucleotides" in {
     val s = "AGCTTTTCATTCTGACTGCAACGGGCAATATGTCTCTGTGTGGATTAAAAAAAGAGTGTCTGATAGCAGC"
     val dna = new DNA(s)
-    val expected = Map('A' -> 20, 'T' -> 21, 'G' -> 17, 'C' -> 12)
+    val expected = Right(Map('A' -> 20, 'T' -> 21, 'G' -> 17, 'C' -> 12))
     dna.nucleotideCounts should be (expected)
+  }
+
+  it should "validate dna" in {
+    new DNA("GACYT").nucleotideCounts should be (Left("invalid nucleotide 'Y'"))
   }
 }

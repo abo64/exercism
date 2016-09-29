@@ -2,27 +2,36 @@ import DNA._
 
 class DNA(dna: String) {
 
-  require(isValidDNA(dna),
-      s"DNA must contain only nucleotides ${DnaNucleotides.mkString}: $dna")
+  def count(char: Char): OrError[Int] =
+    for {
+      nucleotide <- toNucleotide(char).right
+      counts <- nucleotideCounts.right
+    } yield counts(nucleotide)
 
-  lazy val nucleotideCounts: NucleotideCounts = {
-    val counts = dna groupBy(identity) mapValues(_.length)
-    EmptyDnaNucleotideCounts ++ counts
+  lazy val nucleotideCounts: OrError[NucleotideCounts] = {
+    val zeroCounts: Either[String, NucleotideCounts] =
+      Right(EmptyNucleotideCounts)
+
+    dna.foldLeft(zeroCounts) { case (nucleotideCounts, char) =>
+      for {
+        nucleotide <- toNucleotide(char).right
+        counts <- nucleotideCounts.right
+      } yield counts updated (nucleotide, counts.getOrElse(nucleotide, 0) + 1)
+    }
   }
+
+  private def toNucleotide(char: Char): OrError[Nucleotide] =
+    if (DnaNucleotides.contains(char)) Right(char)
+    else Left(s"invalid nucleotide '$char'")
 }
 
 object DNA {
   type Nucleotide = Char
   type NucleotideCounts = Map[Nucleotide,Int]
+  type OrError[T] = Either[String, T]
 
   val DnaNucleotides: Set[Nucleotide] = Set('A', 'T', 'C', 'G')
 
-  val EmptyDnaNucleotideCounts: NucleotideCounts = {
-    def zeroCount(nucleotide: Nucleotide) = nucleotide -> 0
-
-    DnaNucleotides map zeroCount toMap
-  }
-
-  def isValidDNA(dna: String) =
-    dna forall DnaNucleotides.contains
+  val EmptyNucleotideCounts: NucleotideCounts =
+    DnaNucleotides map (_ -> 0) toMap
 }
