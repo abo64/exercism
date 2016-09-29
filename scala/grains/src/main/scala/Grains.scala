@@ -1,33 +1,30 @@
-import collection.mutable
-import GrainsTypes._
+import scala.annotation.tailrec
 
-object GrainsTypes {
+object Grains {
   type Grains = BigInt
-  type ChessboardSquares = Int
-}
+  type ChessboardSquare = Int
 
-object Grains extends WithCache[ChessboardSquares,Grains] {
+  private val ChessboardSquares = 64
 
-  val TotalChessboardSquares = 64
+  def square(cbSquare: ChessboardSquare): Option[Grains] = {
+    def isValidChessboardSquare(n: Int) =
+      1 <= n && n <= ChessboardSquares
 
-  val Two = BigInt(2)
+    def powerOfTwo(n: Int): BigInt = {
+      @tailrec
+      def loop(n: Int, acc: BigInt): BigInt =
+        if (n == 0) acc
+        else loop(n - 1, acc * 2)
 
-  def square(chessboardSquares: ChessboardSquares): Grains = {
-    require(chessboardSquares >= 1 && chessboardSquares <= TotalChessboardSquares,
-        s"invalid chessboard squares: $chessboardSquares")
+      loop(n, 1)
+    }
 
-    withCache(chessboardSquares, grains)
+    val pred = (_:Int) - 1
+
+//    Option(cbSquare) filter isValidChessboardSquare map pred.andThen(math.pow(_, 2).toInt)
+    Option(cbSquare) filter isValidChessboardSquare map pred.andThen(powerOfTwo)
   }
 
-  def total: Grains = (1 to TotalChessboardSquares) map square sum
-
-  private def grains(chessboardSquares: ChessboardSquares): Grains =
-    Two pow (chessboardSquares - 1)
-}
-
-trait WithCache[K,V] {
-  private val cache = mutable.Map[K,V]()
-
-  def withCache(key: K, f: K => V): V =
-    cache getOrElseUpdate(key, f(key))
+  def total: Grains =
+    (1 to ChessboardSquares) flatMap (square _).andThen(_.toList) sum
 }
