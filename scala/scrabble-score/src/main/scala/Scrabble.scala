@@ -1,15 +1,19 @@
 import Scrabble._
 
 class Scrabble {
-  def scoreLetter(letter: Char): Int =
-    letterValue(letter.toUpper)
+  val scoreLetter: Char => Int =
+    letterValue compose (_.toUpper)
+
+  import Foldable._
+  import Monoid._
 
   def scoreWord(word: String): Int =
-    word map scoreLetter sum
+    word.toSeq foldMap ((IntSum(_)) compose scoreLetter) getSum
+    // Haskell: getSum . foldMap (Sum . scoreLetter)
 }
 
 object Scrabble {
-  val letterValue = {
+  val letterValue: Map[Char, Int] = {
     def valueMap(letters: Char*)(value: Int): Map[Char, Int] =
       letters map ((_, value)) toMap
 
