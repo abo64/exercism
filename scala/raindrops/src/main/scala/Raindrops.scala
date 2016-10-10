@@ -1,25 +1,31 @@
-import scala.collection.SortedMap
-
 object Raindrops {
 
   // needed for the tests to compile and run
   def apply() = this
 
+  private val factorMessages =
+    Seq((3, "Pling"),
+        (5, "Plang"),
+        (7, "Plong"))
+
   def convert(number: Int): String = {
-    def hasPrimeFactor(primeFactor: Int): Boolean =
-      number % primeFactor == 0
+    def hasFactor(factor: Int): Boolean =
+      number % factor == 0
 
-    def raindrop(primeFactor: Int, sound: String): String => String =
-      str => if (hasPrimeFactor(primeFactor)) str + sound else str
+    val getMessage: ((Int, String)) => Option[String] = {
+      case (factor, message) =>
+        Option(factor) filter hasFactor map const(message)
+//        for {
+//          _ <- Option(factor) if hasFactor(factor)
+//        } yield message
+    }
+    // Haskell: getMessage (f, xs) = guard (x `mod` f == 0) >> return xs
 
-    "" |> raindrop(3, "Pling") |> raindrop(5, "Plang") |> raindrop(7, "Plong") |>
-      { result =>
-          if (result.nonEmpty) result
-          else number.toString
-      }
+    import Foldable._
+
+    factorMessages foldMap getMessage getOrElse number.toString
+    // Haskell: fromMaybe (show x) (foldMap getMessage factorMessages)
   }
 
-  implicit class Pipe[A](a: A) {
-    def |>[B](f: A => B) = f(a)
-  }
+  private def const[A,B](a: A)(ignore: B): A = a
 }
