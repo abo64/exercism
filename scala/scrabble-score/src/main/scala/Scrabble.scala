@@ -1,14 +1,18 @@
+//import scalaz.std.list._
+//import scalaz.std.math.bigInt._
+//import scalaz.syntax.traverse._
+import cats.instances.list._
+import cats.instances.bigInt._
+import cats.syntax.foldable._
+
 import Scrabble._
 
 class Scrabble {
   val scoreLetter: Char => Int =
     letterValue compose (_.toUpper)
 
-  import Foldable._
-  import Monoid._
-
   def scoreWord(word: String): Int =
-    word.toSeq foldMap ((IntSum(_)) compose scoreLetter) getSum
+    word.toList foldMap ((BigInt.int2bigInt _) compose scoreLetter) intValue
     // Haskell: getSum . foldMap (Sum . scoreLetter)
 }
 
