@@ -1,6 +1,10 @@
-import scalaz.std.list._
-import scalaz.std.option._
-import scalaz.syntax.traverse._
+//import scalaz.std.list._
+//import scalaz.std.option._
+//import scalaz.syntax.traverse._
+import cats.instances.list._
+import cats.instances.option._
+import cats.syntax.traverse._
+
 
 object Dna {
   private type Strand = String
@@ -8,12 +12,6 @@ object Dna {
 
   def toRna(dna: String): Option[Strand] =
     dna.toList.traverse(toRnaNucleotide) map (_.mkString)
-//    dna.foldRight (Option("")) { case (char, rna) =>
-//      for {
-//        rnaNucleotide <- toRnaNucleotide(char)
-//        rnaStrand <- rna
-//      } yield rnaNucleotide +: rnaStrand
-//  }
 
   private val DnaToRna =
     Map('G' -> 'C', 'C' -> 'G', 'T' -> 'A', 'A' -> 'U')
