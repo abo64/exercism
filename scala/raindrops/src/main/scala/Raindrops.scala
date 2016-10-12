@@ -12,9 +12,12 @@ object Raindrops {
     def hasFactor(factor: Int): Boolean =
       number % factor == 0
 
+    import Monad._
+
     val getMessage: ((Int, String)) => Option[String] = {
       case (factor, message) =>
-        Option(factor) filter hasFactor map const(message)
+        (Option(factor) guard hasFactor(factor)) >> unit(message)
+//        Option(factor) filter hasFactor map const(message)
 //        for {
 //          _ <- Option(factor) if hasFactor(factor)
 //        } yield message
@@ -27,5 +30,5 @@ object Raindrops {
     // Haskell: fromMaybe (show x) (foldMap getMessage factorMessages)
   }
 
-  private def const[A,B](a: A)(ignore: B): A = a
+//  private def const[A,B](a: A)(ignore: B): A = a
 }
