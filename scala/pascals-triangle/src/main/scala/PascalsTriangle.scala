@@ -1,32 +1,26 @@
+import scala.annotation.tailrec
+
 object PascalsTriangle {
-  type Row = Seq[Int]
-  type PascalsTriangle = Seq[Row]
+  type Row = List[Int]
+  type PascalsTriangle = List[Row]
 
-  def triangle(rows: Int): PascalsTriangle = {
-    unfoldRight((rows, FirstRow)) { case (rowNumber, lastRow) =>
-      if (rowNumber == 0) None
-      else {
-        val newRow = nextRow(lastRow)
-        Some((lastRow, (rowNumber - 1, newRow)))
+  private val FirstRow: Row = List(1)
+
+  def triangle(howManyRows: Int): PascalsTriangle = {
+    def nextRow(row: Row): Row =
+      zipWith(0 +: row, row :+ 0)(_ + _)
+
+    List.iterate(FirstRow, howManyRows)(nextRow)
+  }
+
+  private def zipWith[A,B,C](as: List[A], bs: List[B])(f: (A,B) => C): List[C] = {
+    @tailrec
+    def loop(as: List[A], bs: List[B], cs: List[C]): List[C] =
+      (as, bs) match {
+        case (Nil, Nil) => cs
+        case (a+:as, b+:bs) => loop(as, bs, cs :+ f(a, b))
       }
-    }
-  }
 
-  private val FirstRow: Row = (Seq(1))
-
-  private def nextRow(row: Row): Row = {
-    def sumOfNeighbors(position: Int): Int = {
-      val left = if (position == 0) 0 else row(position - 1)
-      val right = if (position < row.size) row(position) else 0
-      left + right
-    }
-
-    (0 to row.size) map sumOfNeighbors
-  }
-
-  private[this] def unfoldRight[A,B](seed: B)(f: B => Option[(A,B)]): Seq[A] =
-    f(seed) match {
-    case None => Seq()
-    case Some((a,b)) => a +: unfoldRight(b)(f)
+    loop(as, bs, List())
   }
 }
