@@ -1,59 +1,67 @@
-import Robot._
 import Bearing._
 import Instruction._
+import typeclass._
 
 case class Robot(bearing: Bearing, coordinates: Coordinates) {
-  def advance: Movement =
+  def advance: Robot =
     copy(coordinates = bearing.advance(coordinates))
 
-  def turnRight(): Movement =
-    copy(bearing = bearing.right)
+  // bring it into scope
+  import CircularBearing._
 
-  def turnLeft(): Movement =
-    copy(bearing = bearing.left)
+  def turnRight(): Robot =
+    copy(bearing = bearing.next)
 
-  def simulate(instructions: Instructions): Movement = {
-    def execute(robot: Robot, instruction: Instruction): Movement =
+  def turnLeft(): Robot =
+    copy(bearing = bearing.previous)
+
+  def simulate(instructions: Instructions): Robot = {
+    def execute(robot: Robot, instruction: Instruction): Robot =
       instruction.execute(robot)
 
     instructions.foldLeft(this)(execute)
   }
 }
 
-object Robot {
-  type Coordinates = (Int,Int)
-  type Movement = Robot
-}
-
 object Bearing {
-  sealed trait Bearing {
-    def left: Bearing
-    def right: Bearing
-    def advancement: (Int,Int)
+  type Coordinates = (Int,Int)
 
-    def advance(coordinates: Coordinates): Coordinates =
-      (coordinates._1 + advancement._1, coordinates._2 + advancement._2)
+  private type Advance = Coordinates => Coordinates
+
+  sealed trait Bearing {
+    def advance: Advance
   }
 
   case object North extends Bearing {
-    override val left = West
-    override val right = East
-    override val advancement = (0,1)
+    override val advance: Advance = { case (x, y) => (x, y + 1) }
   }
   case object South extends Bearing {
-    override val left = East
-    override val right = West
-    override val advancement = (0,-1)
+    override val advance: Advance = { case (x, y) => (x, y - 1) }
   }
   case object West extends Bearing {
-    override val left = South
-    override val right = North
-    override val advancement = (-1,0)
+    override val advance: Advance = { case (x, y) => (x - 1, y) }
   }
   case object East extends Bearing {
-    override val left = North
-    override val right = South
-    override val advancement = (1,0)
+    override val advance: Advance = { case (x, y) => (x + 1, y) }
+  }
+
+  private val values: Seq[Bearing] = Seq(North, East, South, West)
+
+  implicit object BoundedBearing extends Bounded[Bearing] {
+    override val minBound = values.head
+    override val maxBound = values.last
+  }
+
+  implicit object EnumBearing extends Enum[Bearing] {
+    override val pred: Bearing => Bearing =
+      bearing => values(values.indexOf(bearing) - 1)
+    override val succ: Bearing => Bearing =
+      bearing => values(values.indexOf(bearing) + 1)
+  }
+
+  implicit object CircularBearing extends Circular[Bearing] {
+    override val bounded = BoundedBearing
+    override val enum = EnumBearing
   }
 }
 
@@ -62,7 +70,7 @@ object Instruction {
   type Instructions = Seq[Instruction]
 
   implicit class InstructionOps(self: Instruction) {
-    def execute(robot: Robot): Movement =
+    def execute(robot: Robot): Robot =
       self match {
         case 'R' => robot.turnRight
         case 'L' => robot.turnLeft
