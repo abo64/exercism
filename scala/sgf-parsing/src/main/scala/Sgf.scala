@@ -1,3 +1,4 @@
+import scala.Function.const
 import scala.util.parsing.combinator.RegexParsers
 
 object Sgf extends RegexParsers {
@@ -61,6 +62,4 @@ object Sgf extends RegexParsers {
 
     escapedNewline | escapedChar | whitespace | ident
   }
-
-  private def const[A](a: A)(ignore: Any) = a
 }
