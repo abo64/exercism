@@ -1,4 +1,6 @@
+import scala.Function.const
 import scala.util.parsing.combinator.RegexParsers
+
 import Alphametics.Solution
 
 object Alphametics {
@@ -69,8 +71,6 @@ object ExpressionParser extends RegexParsers {
 
   private val power: Parser[(Expression[Int], Expression[Int]) => Expression[Int]] =
     "^" ^^ const(Power(_, _))
-
-  private def const[A](a: A)(ignore: Any) = a
 }
 
 
