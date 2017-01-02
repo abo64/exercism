@@ -9,7 +9,7 @@ type Name = String
 type School = Map Grade [Name]
 
 add :: Grade -> Name -> School -> School
-add grad name = M.insertWith (++) grad [name]
+add grad name = M.insertWith (flip (++)) grad [name]
 
 empty :: School
 empty = M.empty
