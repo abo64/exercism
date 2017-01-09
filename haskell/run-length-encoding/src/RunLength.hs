@@ -1,18 +1,21 @@
 module RunLength (decode, encode) where
 
-import Data.Char (isDigit, digitToInt)
+import Data.Char (isDigit)
 import Data.List (group)
 
 decode :: String -> String
-decode = reverse . snd . foldl nextChar (0, "")
+decode [] = []
+decode xs
+  | null digits = y : decode ys
+  | otherwise   = replicate n y ++ decode ys
   where
-    nextChar (n, xs) x
-      | isDigit x = (n * 10 + digitToInt x, xs)
-      | n == 0 = (0, x:xs)
-      | otherwise = (0, replicate n x ++ xs)
+    (digits, y:ys) = span isDigit xs  -- assumes syntactically correct input
+    n = read digits :: Int
 
 encode :: String -> String
 encode = concatMap encodedGroup . group
   where
     encodedGroup x = count x ++ [head x]
-    count x = if length x > 1 then show $ length x else ""
+    count x
+      | length x > 1 = show $ length x
+      | otherwise    = ""
