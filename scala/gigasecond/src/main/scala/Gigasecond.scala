@@ -1,25 +1,17 @@
-import java.util.GregorianCalendar
-import Gigasecond._
-
-case class Gigasecond(start: Date) {
-  lazy val date: Date = addSeconds(start, OneGigaSec)
-}
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 
 object Gigasecond {
-  type Date = GregorianCalendar
-  type Seconds = Long
-  type Milliseconds = Long
+  private type Seconds = Long
 
-  val OneGigaSec: Seconds = math.pow(10, 9) toLong
-
-  val MillisPerSecond = 1000L
-
-  def addSeconds(date: Date, seconds: Seconds): Date = {
-    val dateInMilliseconds: Milliseconds = date.getTime.getTime
-    val timestamp: Milliseconds = dateInMilliseconds + seconds * MillisPerSecond
-
-    val result = date.clone.asInstanceOf[Date]
-    result.setTimeInMillis(timestamp)
-    result
+  def addGigaseconds(startDate: LocalDate): LocalDateTime = {
+    val startDateTime = LocalDateTime.of(startDate, LocalTime.of(0, 0))
+    addGigaseconds(startDateTime)
   }
+
+  def addGigaseconds(startDateTime: LocalDateTime): LocalDateTime =
+    startDateTime.plusSeconds(OneGigasecond)
+
+  private val OneGigasecond: Seconds = math.pow(10, 9) toLong
 }
