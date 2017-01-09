@@ -10,16 +10,17 @@ object RunLengthEncoding {
     splitByEquals(str) flatMap encodeGroup mkString
   }
 
+
   def decode(str: Encoded): Plain = {
-    val nextChar: ((Int, Seq[Char]), Char) => (Int, Seq[Char]) = {
-      case ((n, xs), x) =>
-        if (x.isDigit) (n * 10 + x.asDigit, xs)
-        else if (n == 0) (0, x +: xs)
-        else (0, Seq.fill(n)(x) ++ xs)
+    def decodeList(xs: List[Char]): List[Char] = 
+    if (xs.isEmpty) List()
+    else {
+      val (digits, y::ys) = xs span (_.isDigit)
+      if (digits.isEmpty) y::decodeList(ys)
+      else List.fill(digits.mkString toInt)(y) ::: decodeList(ys)
     }
 
-    val result = str.foldLeft((0, Seq.empty[Char]))(nextChar)
-    result._2.reverse mkString
+    decodeList(str.toList) mkString
   }
 
   private def splitByEquals[T](xs: Seq[T]): Seq[Seq[T]] =
