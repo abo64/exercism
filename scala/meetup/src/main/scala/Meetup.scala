@@ -1,3 +1,4 @@
+import java.time.LocalDate
 import scala.annotation.tailrec
 import Meetup._
 
@@ -36,15 +37,7 @@ object Meetup {
   type CalendarDayOfWeek = Int
 
   object WeekDay {
-    val values: Seq[WeekDay] = Seq(Sun, Mon, Tue, Wed, Thu, Fri, Sat)
-
-//    def distance(from: WeekDay, to: WeekDay, forward: Boolean = true): Int = {
-//      val (fromIndex, toIndex) = (values.indexOf(from), values.indexOf(to))
-//      var dist = if (forward) toIndex - fromIndex else fromIndex - toIndex
-//      if (dist == 0) dist = 7
-//      val result = if (dist < 0) dist + 7 else dist
-//      if (forward) result else -result
-//    }
+    val values: Seq[WeekDay] = Seq(Mon, Tue, Wed, Thu, Fri, Sat, Sun)
 
     implicit def weekDayToCalendarDayOfWeek(weekDay: WeekDay): CalendarDayOfWeek =
       values.indexOf(weekDay) + 1
@@ -53,20 +46,18 @@ object Meetup {
       values(dayOfWeek - 1)
   }
 
-  import java.util.GregorianCalendar
-  type MeetupDate = GregorianCalendar
+  type MeetupDate = LocalDate
   object MeetupDate {
     def apply(year: Int = 1970, month: Int = 1, dayOfMonth: Int = 1): MeetupDate =
-      new GregorianCalendar(year, month - 1, dayOfMonth)
+      LocalDate.of(year, month, dayOfMonth)
   }
 
   implicit class MeetupDateOps(self: MeetupDate) {
-    import java.util.Calendar._
 
-    def year = self.get(YEAR)
-    def month = self.get(MONTH) + 1
-    def dayOfMonth = self.get(DAY_OF_MONTH)
-    def weekDay: WeekDay = self.get(DAY_OF_WEEK)
+    def year = self.getYear
+    def month = self.getMonth.getValue
+    def dayOfMonth = self.getDayOfMonth
+    def weekDay: WeekDay = self.getDayOfWeek.getValue
 
     def copy(year: Int = self.year, month: Int = self.month, dayOfMonth: Int = self.dayOfMonth) =
       MeetupDate(year, month, dayOfMonth)
@@ -79,25 +70,18 @@ object Meetup {
     }
 
     def next(weekDay: WeekDay): MeetupDate =
-      nextDay loopUntil (_.weekDay == weekDay, _.setNextDay)
-//      copy(dayOfMonth = dayOfMonth + WeekDay.distance(self.weekDay, weekDay))
+      nextDay loopUntil (_.weekDay == weekDay, _.nextDay)
 
     def previous(weekDay: WeekDay): MeetupDate =
-      previousDay loopUntil (_.weekDay == weekDay, _.setPreviousDay)
-//      copy(dayOfMonth = dayOfMonth + WeekDay.distance(self.weekDay, weekDay, false))
+      previousDay loopUntil (_.weekDay == weekDay, _.previousDay)
 
-    def nextDay: MeetupDate = self.copy(dayOfMonth = dayOfMonth + 1)
-    def previousDay: MeetupDate = self.copy(dayOfMonth = dayOfMonth - 1)
+    def nextDay: MeetupDate = self.plusDays(1)
+    def previousDay: MeetupDate = self.minusDays(1)
 
-    def nextWeek: MeetupDate = self.copy(dayOfMonth = dayOfMonth + 7)
-    def previousWeek: MeetupDate = self.copy(dayOfMonth = dayOfMonth - 7)
-
-    // for efficiency: side effect on self instead of creating a copy
-    private def effect(ef: MeetupDate => Unit): MeetupDate = { ef(self); self }
-    def setNextDay: MeetupDate = effect(_.add(DAY_OF_MONTH, +1))
-    def setPreviousDay: MeetupDate = effect(_.add(DAY_OF_MONTH, -1))
+    def nextWeek: MeetupDate = self.plusWeeks(1)
+    def previousWeek: MeetupDate = self.minusWeeks(1)
 
     def nextMonth: MeetupDate =
-      self.copy(dayOfMonth = 1, month = month + 1)
+      self.copy(dayOfMonth = 1).plusMonths(1)
   }
 }
