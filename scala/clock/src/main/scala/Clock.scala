@@ -9,10 +9,11 @@ trait Clock {
     f"$hour%02d:$min%02d"
 
   override def equals(any: Any): Boolean =
-    if (any.isInstanceOf[Clock]) {
-      val otherClock = any.asInstanceOf[Clock]
-      hour == otherClock.hour && min == otherClock.min
-    } else false
+    any match {
+      case otherClock: Clock =>
+        hour == otherClock.hour && min == otherClock.min
+      case _ => false
+    }
 
   def +(other: Clock): Clock = {
     val (newHour, newMin) = addMinsAndHours(min, other.min, hour, other.hour)
