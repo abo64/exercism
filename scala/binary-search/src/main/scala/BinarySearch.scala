@@ -1,7 +1,7 @@
 import scala.annotation.tailrec
 
 object BinarySearch {
-  def search[T](ts: Seq[T], what: T)(implicit ev: T => Ordered[T]): Option[Int] =
+  def search[T <% Ordered[T]](ts: Seq[T], what: T): Option[Int] =
   {
     @tailrec
     def loop(start: Int, end: Int): Option[Int] =
