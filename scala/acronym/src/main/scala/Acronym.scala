@@ -1,13 +1,13 @@
 object Acronym {
 
   def abbreviate(phrase: String): String = {
-    def acronymChar(x: Char, y: Char): Option[Char] =
-      if (!x.isLetter && y.isLetter) Some(y.toUpper)
-      else if (!x.isUpper && y.isUpper) Some(y)
-      else None
+    val acronymChar: PartialFunction[(Char, Char), Char] = {
+      case ((x, y)) if (!x.isLetter && y.isLetter) => y.toUpper
+      case ((x, y)) if (!x.isUpper && y.isUpper) => y
+    }
 
     val charPairs = ' ' +: phrase zip phrase
 
-    charPairs flatMap (acronymChar _).tupled.andThen(_.toList) mkString
+    charPairs collect acronymChar mkString
   }
 }
